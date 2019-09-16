@@ -1,10 +1,28 @@
-from flask import Flask, render_template, request, session, url_for
+from datetime import datetime
+
+from flask import Flask, render_template, request, session, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug import security
 from werkzeug.utils import redirect
 
 from helpers import login_required
 
 app = Flask(__name__)
 app.secret_key = b',w\xac\x87\xee\x9e\x83gf46s\x8c\xdbU\x1d'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gifted.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(240), nullable=False)
+    registered_on = db.Column(db.DateTime(), default=datetime.now())
+    updated_on = db.Column(db.DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return '<User %r>' % self.username
 
 
 @app.route('/')
@@ -16,9 +34,32 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        session['username'] = request.form.get('username')
-        print(session)
-        return redirect(url_for('index'))
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if not username:
+            flash('Username is required!', 'error')
+            return redirect(url_for('login'))
+        if not password:
+            flash('Password is required!', 'error')
+            return redirect(url_for('login'))
+
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            flash('Username does not exist!', 'error')
+            return redirect(url_for('login'))
+
+        # password is valid, proceed to set session cookie and redirect to index
+        # otherwise, flash a friendly message
+        if security.check_password_hash(pwhash=user.password, password=password):
+            session['username'] = request.form.get('username')
+            flash('Logged in successfully', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid password!', 'error')
+            return redirect(url_for('login'))
+
     return render_template('login.html')
 
 
@@ -26,4 +67,5 @@ def login():
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
 
