@@ -18,12 +18,16 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(240), nullable=False)
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     updated_on = db.Column(db.DateTime(), default=datetime.now())
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, first_name, last_name):
         self.username = username
         self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
 
     def __repr__(self):
         return '<User id=%r, username=%r>' % (self.id, self.username)
@@ -67,9 +71,11 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        first_name = request.form.get('firstName')
+        last_name = request.form.get('lastName')
         validate(username, password)
 
-        user = User(username, security.generate_password_hash(password))
+        user = User(username, security.generate_password_hash(password), first_name, last_name)
         db.session.add(user)
         db.session.commit()
 
