@@ -21,8 +21,12 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     updated_on = db.Column(db.DateTime(), default=datetime.now())
 
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User id=%r, username=%r>' % (self.id, self.username)
 
 
 @app.route('/')
@@ -36,13 +40,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
-        if not username:
-            flash('Username is required!', 'error')
-            return redirect(url_for('login'))
-        if not password:
-            flash('Password is required!', 'error')
-            return redirect(url_for('login'))
+        validate(username, password)
 
         user = User.query.filter_by(username=username).first()
 
@@ -60,7 +58,26 @@ def login():
             flash('Invalid password!', 'error')
             return redirect(url_for('login'))
 
+    # it's a GET, render the template
     return render_template('login.html')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        validate(username, password)
+
+        user = User(username, security.generate_password_hash(password))
+        db.session.add(user)
+        db.session.commit()
+
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('login'))
+
+    # it's a GET, render the template
+    return render_template('register.html')
 
 
 @app.route('/logout')
@@ -68,4 +85,12 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
 
+
+def validate(username, password):
+    if not username:
+        flash('Username is required!', 'error')
+        return redirect(url_for('login'))
+    if not password:
+        flash('Password is required!', 'error')
+        return redirect(url_for('login'))
 
