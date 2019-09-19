@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Flask, render_template, request, session, url_for, flash
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import security
 from werkzeug.utils import redirect
@@ -12,25 +13,21 @@ app.secret_key = b',w\xac\x87\xee\x9e\x83gf46s\x8c\xdbU\x1d'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gifted.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+db.create_all()
+migrate = Migrate(app, db)
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(240), nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     updated_on = db.Column(db.DateTime(), default=datetime.now())
 
-    def __init__(self, username, password, first_name, last_name):
-        self.username = username
-        self.password = password
-        self.first_name = first_name
-        self.last_name = last_name
-
     def __repr__(self):
-        return '<User id=%r, username=%r>' % (self.id, self.username)
+        return '<User id=%r, email=%r>' % (self.id, self.email)
 
 
 @app.route('/')
@@ -42,11 +39,11 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
+        email = request.form.get('email')
         password = request.form.get('password')
-        validate(username, password)
+        validate(email, password)
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
 
         if user is None:
             flash('Username does not exist!', 'error')
@@ -69,13 +66,14 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
+        email = request.form.get('email')
         password = request.form.get('password')
         first_name = request.form.get('firstName')
         last_name = request.form.get('lastName')
-        validate(username, password)
+        validate(email, password)
 
-        user = User(username, security.generate_password_hash(password), first_name, last_name)
+        user = User(email=email, password=security.generate_password_hash(password),
+                    first_name=first_name, last_name=last_name)
         db.session.add(user)
         db.session.commit()
 
@@ -92,9 +90,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-def validate(username, password):
-    if not username:
-        flash('Username is required!', 'error')
+def validate(email, password):
+    if not email:
+        flash('Email is required!', 'error')
         return redirect(url_for('login'))
     if not password:
         flash('Password is required!', 'error')
