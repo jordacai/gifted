@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask import session, url_for
+from flask import session, url_for, flash
 from werkzeug.utils import redirect
 
 
@@ -11,3 +11,12 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def validate(email, password):
+    if not email:
+        flash('Email is required!', 'error')
+        return redirect(url_for('login'))
+    if not password:
+        flash('Password is required!', 'error')
+        return redirect(url_for('login'))

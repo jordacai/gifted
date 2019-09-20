@@ -1,33 +1,9 @@
-from datetime import datetime
-
-from flask import Flask, render_template, request, session, url_for, flash
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from flask import render_template, request, flash, url_for, session
 from werkzeug import security
 from werkzeug.utils import redirect
 
-from helpers import login_required
-
-app = Flask(__name__)
-app.secret_key = b',w\xac\x87\xee\x9e\x83gf46s\x8c\xdbU\x1d'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gifted.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-db.create_all()
-migrate = Migrate(app, db)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(240), nullable=False)
-    first_name = db.Column(db.String(80), nullable=False)
-    last_name = db.Column(db.String(80), nullable=False)
-    registered_on = db.Column(db.DateTime(), default=datetime.now())
-    updated_on = db.Column(db.DateTime(), default=datetime.now())
-
-    def __repr__(self):
-        return '<User id=%r, email=%r>' % (self.id, self.email)
+from gifted import app, login_required, validate, db
+from gifted.models import User
 
 
 @app.route('/')
@@ -88,13 +64,3 @@ def register():
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
-
-
-def validate(email, password):
-    if not email:
-        flash('Email is required!', 'error')
-        return redirect(url_for('login'))
-    if not password:
-        flash('Password is required!', 'error')
-        return redirect(url_for('login'))
-
