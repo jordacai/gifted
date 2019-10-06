@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import (
     Blueprint, flash, render_template, request, session,
     url_for)
@@ -5,7 +7,7 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db
-from gifted.models import User
+from gifted.models import User, Invite
 
 bp = Blueprint('views', __name__)
 
@@ -67,10 +69,43 @@ def register():
 
 @bp.route('/admin')
 def admin():
-    return render_template('admin.html')
+    users = User.query.all()
+    invites = Invite.query.filter_by(valid=1).all()
+    return render_template('admin.html', users=users, invites=invites)
+
+
+@bp.route('/admin/invite', methods=['POST'])
+def invite():
+    email = request.form.get('email')
+    invitation = Invite(email=email)
+    db.session.add(invitation)
+    db.session.commit()
+    flash(f'Invited {email}!', 'success')
+    return redirect(url_for('views.admin'))
+
+
+@bp.route('/admin/revoke', methods=['POST'])
+def revoke():
+    invitation_id = request.form.get('id')
+    invitation = Invite.query.filter_by(id=invitation_id).first()
+    invitation.valid = 0
+    db.session.commit()
+    flash(f'Revoked {invitation.email}\'s invitation', 'success')
+    return redirect(url_for('views.admin'))
 
 
 @bp.route('/logout')
 def logout():
     session.pop('username', None)
     return redirect(url_for('views.login'))
+
+
+@bp.app_template_filter('pretty_boolean')
+def pretty_boolean(i):
+    return True if i is 1 else False
+
+
+@bp.app_template_filter('is_expired')
+def is_expired(expires):
+    now = datetime.now()
+    return True if now > expires else False

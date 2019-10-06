@@ -3,7 +3,6 @@ Click==7.0
 Flask==1.1.1
 Flask-Migrate==2.5.2
 Flask-SQLAlchemy==2.4.0
--e git+https://github.com/jcaimano/gifted.git@ec332f1c7f0ee9136108b50fec412f26f8d21117#egg=gifted
 itsdangerous==1.1.0
 Jinja2==2.10.1
 Mako==1.1.0

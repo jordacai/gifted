@@ -5,5 +5,74 @@ admin
 {% endblock %}
 
 {% block main %}
-<h3>todo</h3>
+<h4>Users</h4>
+    <table class="table table">
+        <thead>
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">username</th>
+                <th scope="col">first name</th>
+                <th scope="col">last name</th>
+                <th scope="col">registered on</th>
+                <th scope="col">admin?</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <th scope="row">{{ user.id }}</th>
+                <th scope="row">{{ user.username }}</th>
+                <th scope="row">{{ user.first_name }}</th>
+                <th scope="row">{{ user.last_name }}</th>
+                <th scope="row">{{ user.registered_on }}</th>
+                <th scope="row">{{ user.is_admin | pretty_boolean }}</th>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<br/>
+<br/>
+<h4>Invites</h4>
+    {% if not invites %}
+        <p>No invites pending</p>
+        <form action="/admin/invite" method="post">
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
+                <button class="btn btn-primary" type="submit">invite</button>
+            </div>
+        </form>
+    {% else %}
+    <table class="table table">
+        <thead>
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">email</th>
+                <th scope="col">valid</th>
+                <th scope="col">created</th>
+                <th scope="col">expired</th>
+                <th scope="col">code</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invite in invites %}
+            <tr>
+                <th scope="row">{{ invite.id }}</th>
+                <th scope="row">{{ invite.email }}</th>
+                <th scope="row">{{ invite.valid | pretty_boolean }}</th>
+                <th scope="row">{{ invite.created }}</th>
+                <th scope="row">{{ invite.expires | is_expired }}</th>
+                <th scope="row">{{ invite.code }}</th>
+                <th scope="row">
+                    <form action="/admin/revoke" method="post">
+                        <input hidden name="id" type="number" value="{{ invite.id }}">
+                        <button class="btn btn-primary btn-sm" type="submit">revoke</button>
+                    </form>
+                </th>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
 {% endblock %}

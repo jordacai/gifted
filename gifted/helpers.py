@@ -1,3 +1,5 @@
+import random
+import string
 from functools import wraps
 
 from flask import session, url_for, flash
@@ -11,6 +13,10 @@ def login_required(f):
             return redirect(url_for('views.login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def generate_code(size=8, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 
 def validate(username, password):
