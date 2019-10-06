@@ -20,6 +20,9 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session.username %}
                     <ul class="navbar-nav ml-auto mt-2">
+                        {% if session.is_admin %}
+                        <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+                        {% endif %}
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                     </ul>
                 {% else %}
@@ -50,14 +53,6 @@
         </header>
         {% endif %}
     {% endwith %}
-
-<!--        {% if get_flashed_messages() %}-->
-<!--            <header>-->
-<!--                <div class="alert alert-primary border text-center" role="alert">-->
-<!--                    {{ get_flashed_messages() | join(" ") }}-->
-<!--                </div>-->
-<!--            </header>-->
-<!--        {% endif %}-->
 
         <main class="container p-5">
             {% block main %}{% endblock %}
