@@ -1,32 +1,25 @@
 import os
 
 from flask import Flask
+from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from gifted.helpers import validate, login_required
 
 db = SQLAlchemy()
+mail = Mail()
+migrate = Migrate()
 
 
-def create_app(test_config=None):
+def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        SQLALCHEMY_DATABASE_URI='sqlite:///' + os.path.join(app.instance_path, 'gifted.sqlite'),
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
-    )
-
+    with app.app_context():
+        app.config.from_pyfile('config.py')
     db.init_app(app)
-    migrate = Migrate(app, db)
-
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+    mail.init_app(app)
+    migrate.init_app(app, db)
 
     # ensure the instance folder exists
     try:

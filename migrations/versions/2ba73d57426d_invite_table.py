@@ -26,7 +26,6 @@ def upgrade():
     sa.Column('expires', sa.DateTime(), nullable=True),
     sa.Column('code', sa.String(length=80), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
     )
     # ### end Alembic commands ###
 

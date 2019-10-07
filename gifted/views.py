@@ -1,12 +1,15 @@
+import os
 from datetime import datetime
 
 from flask import (
     Blueprint, flash, render_template, request, session,
-    url_for)
+    url_for, current_app)
+from flask_mail import Message
 from werkzeug import security
 from werkzeug.utils import redirect
 
-from gifted import login_required, validate, db
+from gifted import login_required, validate, db, mail
+from gifted.helpers import send_email
 from gifted.models import User, Invite
 
 bp = Blueprint('views', __name__)
@@ -24,7 +27,6 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         validate(username, password)
-
         user = User.query.filter_by(username=username).first()
 
         if user is None:
@@ -64,7 +66,7 @@ def register():
         return redirect(url_for('views.login'))
 
     # it's a GET, render the template
-    return render_template('register.html')
+    return render_template('register.html', email=request.args.get('email'))
 
 
 @bp.route('/admin')
@@ -81,6 +83,16 @@ def invite():
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email}!', 'success')
+
+    message = Message('You have been invited to participate in a Gifted exchange!',
+                      sender=current_app.config.get("MAIL_USERNAME"),
+                      recipients=[current_app.config.get("MAIL_USERNAME")])
+
+    filename = os.path.join(os.path.dirname(current_app.instance_path), 'gifted', 'static', 'email.html')
+    with open(filename, 'r') as f:
+        message.html = f.read()
+    mail.send(message)
+
     return redirect(url_for('views.admin'))
 
 

@@ -19,7 +19,7 @@ class User(db.Model):
 
 class Invite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(80), nullable=False)
     valid = db.Column(db.Integer, default=1)
     created = db.Column(db.DateTime(), default=datetime.now())
     expires = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))

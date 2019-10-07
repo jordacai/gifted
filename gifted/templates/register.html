@@ -7,11 +7,19 @@ register
 {% block main %}
     <form action="/register" method="post">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="email" type="email" aria-describedby="emailHelp">
+            {% if email %}
+            <input autocomplete="off" class="form-control" name="username" placeholder="email" type="email" value="{{ email }}">
+            {% else %}
+            <input autocomplete="off" class="form-control" name="username" placeholder="email" type="email" aria-describedby="emailHelp" autofocus>
             <small id="emailHelp" class="form-text text-muted">This is your username</small>
+            {% endif %}
         </div>
         <div class="form-group">
+            {% if email %}
+            <input class="form-control" name="password" placeholder="password" type="password" autofocus>
+            {% else %}
             <input class="form-control" name="password" placeholder="password" type="password">
+            {% endif %}
         </div>
         <div class="form-group">
             <input class="form-control" name="firstName" placeholder="first name" type="text">
