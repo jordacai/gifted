@@ -5,7 +5,7 @@ register
 {% endblock %}
 
 {% block main %}
-    <form action="/register" method="post">
+    <form action="/register" method="post" oninput='passwordConfirm.setCustomValidity(passwordConfirm.value != password.value ? "Passwords do not match!" : "")'>
         <div class="form-group">
             {% if email %}
             <input autocomplete="off" class="form-control" name="username" placeholder="email" type="email" value="{{ email }}">
@@ -19,6 +19,18 @@ register
             <input class="form-control" name="password" placeholder="password" type="password" autofocus>
             {% else %}
             <input class="form-control" name="password" placeholder="password" type="password">
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="passwordConfirm" placeholder="confirm your password" type="password">
+        </div>
+        <div class="form-group">
+            {% if code %}
+            <input class="form-control" name="code" placeholder="code" type="text" value="{{ code }}" aria-describedby="codeHelp" disabled>
+            <small id="codeHelp" class="form-text text-muted">This is your registration code, copied from the email link!</small>
+            {% else %}
+            <input class="form-control" name="code" placeholder="code" type="text" aria-describedby="noCodeHelp">
+            <small id="noCodeHelp" class="form-text text-muted">This was sent to you via email</small>
             {% endif %}
         </div>
         <div class="form-group">

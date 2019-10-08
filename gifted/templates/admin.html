@@ -33,46 +33,45 @@ admin
 <br/>
 <br/>
 <h4>Invites</h4>
+    <form action="/admin/invite" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
+            <button class="btn btn-primary" type="submit">invite</button>
+        </div>
+    </form>
     {% if not invites %}
         <p>No invites pending</p>
-        <form action="/admin/invite" method="post">
-            <div class="form-group">
-                <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
-                <button class="btn btn-primary" type="submit">invite</button>
-            </div>
-        </form>
     {% else %}
-    <table class="table table">
-        <thead>
-            <tr>
-                <th scope="col">id</th>
-                <th scope="col">email</th>
-                <th scope="col">valid</th>
-                <th scope="col">created</th>
-                <th scope="col">expired</th>
-                <th scope="col">code</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for invite in invites %}
-            <tr>
-                <th scope="row">{{ invite.id }}</th>
-                <th scope="row">{{ invite.email }}</th>
-                <th scope="row">{{ invite.valid | pretty_boolean }}</th>
-                <th scope="row">{{ invite.created }}</th>
-                <th scope="row">{{ invite.expires | is_expired }}</th>
-                <th scope="row">{{ invite.code }}</th>
-                <th scope="row">
-                    <form action="/admin/revoke" method="post">
-                        <input hidden name="id" type="number" value="{{ invite.id }}">
-                        <button class="btn btn-primary btn-sm" type="submit">revoke</button>
-                    </form>
-                </th>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <table class="table table">
+            <thead>
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">email</th>
+                    <th scope="col">valid</th>
+                    <th scope="col">created</th>
+                    <th scope="col">expired</th>
+                    <th scope="col">code</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invite in invites %}
+                <tr>
+                    <th scope="row">{{ invite.id }}</th>
+                    <th scope="row">{{ invite.email }}</th>
+                    <th scope="row">{{ invite.valid | pretty_boolean }}</th>
+                    <th scope="row">{{ invite.created }}</th>
+                    <th scope="row">{{ invite.expires | is_expired }}</th>
+                    <th scope="row">{{ invite.code }}</th>
+                    <th scope="row">
+                        <form action="/admin/revoke" method="post">
+                            <input hidden name="id" type="number" value="{{ invite.id }}">
+                            <button class="btn btn-primary btn-sm" type="submit">revoke</button>
+                        </form>
+                    </th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
-
 {% endblock %}

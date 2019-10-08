@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from flask import (
@@ -9,7 +8,6 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
-from gifted.helpers import send_email
 from gifted.models import User, Invite
 
 bp = Blueprint('views', __name__)
@@ -26,7 +24,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        validate(username, password)
+        validate(username=username, password=password, redirect_to='views.login')
         user = User.query.filter_by(username=username).first()
 
         if user is None:
@@ -53,9 +51,20 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        password_confirm = request.form.get('passwordConfirm')
+        code = request.form.get('code')
         first_name = request.form.get('firstName')
         last_name = request.form.get('lastName')
-        validate(username, password)
+
+        invitation = Invite.query.filter_by(email=username, code=code).first()
+
+        if password != password_confirm:
+            flash('Passwords must match!', 'error')
+            return redirect(url_for('views.register'))
+
+        if invitation is None:
+            flash('This code and email combination is invalid!', 'error')
+            return redirect(url_for('views.register'))
 
         user = User(username=username, password=security.generate_password_hash(password),
                     first_name=first_name, last_name=last_name)
@@ -66,7 +75,7 @@ def register():
         return redirect(url_for('views.login'))
 
     # it's a GET, render the template
-    return render_template('register.html', email=request.args.get('email'))
+    return render_template('register.html', email=request.args.get('email'), code=request.args.get('code'))
 
 
 @bp.route('/admin')
@@ -88,9 +97,7 @@ def invite():
                       sender=current_app.config.get("MAIL_USERNAME"),
                       recipients=[current_app.config.get("MAIL_USERNAME")])
 
-    filename = os.path.join(os.path.dirname(current_app.instance_path), 'gifted', 'static', 'email.html')
-    with open(filename, 'r') as f:
-        message.html = f.read()
+    message.html = render_template('email.html', email=invitation.email, code=invitation.code)
     mail.send(message)
 
     return redirect(url_for('views.admin'))
