@@ -80,12 +80,22 @@ def register():
 
 @bp.route('/admin')
 def admin():
-    users = User.query.all()
-    invites = Invite.query.filter_by(valid=1).all()
+    users = User.query.order_by(User.id.desc()).all()
+    invites = Invite.query.filter_by(valid=1).order_by(Invite.id.desc()).all()
     return render_template('admin.html', users=users, invites=invites)
 
 
-@bp.route('/admin/invite', methods=['POST'])
+@bp.route('/admin/users/delete', methods=['POST'])
+def delete():
+    user_id = request.form.get('id')
+    user = User.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'Deleted user {user}!', 'success')
+    return redirect(url_for('views.admin'))
+
+
+@bp.route('/admin/invites', methods=['POST'])
 def invite():
     email = request.form.get('email')
     invitation = Invite(email=email)
@@ -103,7 +113,7 @@ def invite():
     return redirect(url_for('views.admin'))
 
 
-@bp.route('/admin/revoke', methods=['POST'])
+@bp.route('/admin/invites/revoke', methods=['POST'])
 def revoke():
     invitation_id = request.form.get('id')
     invitation = Invite.query.filter_by(id=invitation_id).first()
