@@ -56,12 +56,11 @@ def register():
         first_name = request.form.get('firstName')
         last_name = request.form.get('lastName')
 
-        invitation = Invite.query.filter_by(email=username, code=code).first()
-
         if password != password_confirm:
             flash('Passwords must match!', 'error')
             return redirect(url_for('views.register'))
 
+        invitation = Invite.query.filter_by(email=username, code=code).first()
         if invitation is None:
             flash('This code and email combination is invalid!', 'error')
             return redirect(url_for('views.register'))
@@ -69,6 +68,7 @@ def register():
         user = User(username=username, password=security.generate_password_hash(password),
                     first_name=first_name, last_name=last_name)
         db.session.add(user)
+        invitation.is_used = 1
         db.session.commit()
 
         flash('Account created successfully!', 'success')
@@ -81,7 +81,7 @@ def register():
 @bp.route('/admin')
 def admin():
     users = User.query.order_by(User.id.desc()).all()
-    invites = Invite.query.filter_by(valid=1).order_by(Invite.id.desc()).all()
+    invites = Invite.query.filter_by(is_valid=1).order_by(Invite.id.desc()).all()
     return render_template('admin.html', users=users, invites=invites)
 
 
@@ -135,6 +135,6 @@ def pretty_boolean(i):
 
 
 @bp.app_template_filter('is_expired')
-def is_expired(expires):
+def is_expired(expires_on):
     now = datetime.now()
-    return True if now > expires else False
+    return True if now > expires_on else False

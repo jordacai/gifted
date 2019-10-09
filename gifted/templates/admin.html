@@ -25,12 +25,14 @@ admin
                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                 <td>{{ user.registered_on }}</td>
                 <td>{{ user.is_admin | pretty_boolean }}</td>
-                <td>
-                    <form action="/admin/users/delete" method="post">
-                        <input hidden name="id" type="number" value="{{ user.id }}">
-                        <button class="btn btn-primary btn-sm" type="submit">delete</button>
-                    </form>
-                </td>
+                {% if user.is_admin == 0 %}
+                    <td>
+                        <form action="/admin/users/delete" method="post">
+                            <input hidden name="id" type="number" value="{{ user.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit">delete</button>
+                        </form>
+                    </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
@@ -55,6 +57,7 @@ admin
                     <th scope="col">created</th>
                     <th scope="col">expired</th>
                     <th scope="col">code</th>
+                    <th scope="col">used?</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -63,13 +66,14 @@ admin
                 <tr>
                     <th scope="row">{{ invite.id }}</th>
                     <td>{{ invite.email }}</td>
-                    <td>{{ invite.created }}</td>
-                    <td>{{ invite.expires | is_expired }}</td>
+                    <td>{{ invite.created_on }}</td>
+                    <td>{{ invite.expires_on | is_expired }}</td>
                     <td>{{ invite.code }}</td>
+                    <td>{{ invite.is_used | pretty_boolean }}</td>
                     <td>
                         <form action="/admin/invites/revoke" method="post">
                             <input hidden name="id" type="number" value="{{ invite.id }}">
-                            <button class="btn btn-primary btn-sm" type="submit">revoke</button>
+                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
                         </form>
                     </td>
                 </tr>

@@ -14,16 +14,17 @@ class User(db.Model):
     is_admin = db.Column(db.Integer, default=0)
 
     def __repr__(self):
-        return '<User id=%r, username=%r>' % (self.id, self.username)
+        return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
 
 
 class Invite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(80), nullable=False)
-    valid = db.Column(db.Integer, default=1)
-    created = db.Column(db.DateTime(), default=datetime.now())
-    expires = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
+    is_valid = db.Column(db.Integer, default=1)
+    created_on = db.Column(db.DateTime(), default=datetime.now())
+    expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
     code = db.Column(db.String(80), default=generate_code())
+    is_used = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return '<Invite id=%r, email=%r, code=%r>' % (self.id, self.email, self.code)
