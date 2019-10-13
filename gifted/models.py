@@ -3,6 +3,10 @@ from datetime import datetime, timedelta
 from gifted import db
 from gifted.helpers import generate_code
 
+participants = db.Table('participants',
+                        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True))
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,3 +32,17 @@ class Invite(db.Model):
 
     def __repr__(self):
         return '<Invite id=%r, email=%r, code=%r>' % (self.id, self.email, self.code)
+
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(240), nullable=False)
+    description = db.Column(db.String(1024))
+    created_on = db.Column(db.DateTime(), default=datetime.now())
+    starts_on = db.Column(db.DateTime())
+    ends_on = db.Column(db.DateTime())
+    participants = db.relationship('User', secondary=participants, lazy='subquery',
+                                   backref=db.backref('events', lazy=True))
+
+    def __repr__(self):
+        return '<Event id=%r, title=%r>' % (self.id, self.title)

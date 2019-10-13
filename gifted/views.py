@@ -8,6 +8,7 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
+from gifted.helpers import randomize
 from gifted.models import User, Invite
 
 bp = Blueprint('views', __name__)
@@ -120,6 +121,14 @@ def revoke():
     invitation.valid = 0
     db.session.commit()
     flash(f'Revoked {invitation.email}\'s invitation', 'success')
+    return redirect(url_for('views.admin'))
+
+
+@bp.route('/admin/randomize')
+def matchmake():
+    users = User.query.order_by(User.id.asc()).all()
+    matches = randomize(users)
+    print(matches)
     return redirect(url_for('views.admin'))
 
 

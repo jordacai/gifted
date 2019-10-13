@@ -1,3 +1,4 @@
+import itertools
 import random
 import string
 from functools import wraps
@@ -30,3 +31,21 @@ def validate(username, password, password_confirm=None, redirect_to='views.login
     if password_confirm is not None and password != password_confirm:
         flash('Passwords must match!', 'error')
         return redirect(url_for(redirect_to))
+
+
+def randomize(users):
+    pairs = []
+    ids = [user.id for user in users]
+    count = len(ids)
+    while count:
+        gifter = random.choice(ids)
+        giftee = random.choice(ids)
+        if gifter != giftee:
+            pairs.append({
+                'gifter': gifter,
+                'giftee': giftee
+            })
+            ids.remove(giftee)
+            count = count - 2
+    return pairs
+
