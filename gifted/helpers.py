@@ -1,6 +1,7 @@
 import itertools
 import random
 import string
+from copy import copy, deepcopy
 from functools import wraps
 
 from flask import session, url_for, flash
@@ -49,3 +50,30 @@ def randomize(users):
             count = count - 2
     return pairs
 
+
+def matchmake(ids):
+    pairs = []
+    giftees = deepcopy(ids)
+    for gifter in ids:
+        add_back = False
+        if gifter in giftees:
+            giftees.remove(gifter)
+            add_back = True
+        # reached end of list with no gifter-giftee pair remaining
+        # i.e. every other pair got matched but one person
+        # scrap it and re-run
+        if len(giftees) == 0:
+            matchmake(ids)
+        else:
+            element = random.choice(giftees)
+            pair = {
+                'gifter': gifter,
+                'giftee': element
+            }
+            print(f'paired up {pair}')
+            pairs.append(pair)
+            giftees.remove(element)
+        if add_back:
+            giftees.append(gifter)
+
+    return pairs
