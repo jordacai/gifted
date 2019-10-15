@@ -77,3 +77,26 @@ def matchmake(ids):
             giftees.append(gifter)
 
     return pairs
+
+
+# todo: replace matchmake(), pass in list of users and unpack their ids
+def true_matchmake(gifters):
+    pairs = []
+    giftees = deepcopy(gifters)
+    random.shuffle(giftees)
+
+    if gifters[-1] == giftees[0]:
+        print('last gifter is first giftee, would result in orphaned pair. reshuffling...')
+        return true_matchmake(gifters)
+
+    for gifter in gifters:
+        if gifter == giftees[-1]:
+            giftee = giftees.pop(-2)
+        else:
+            giftee = giftees.pop()
+        pair = {
+            'gifter': gifter,
+            'giftee': giftee
+        }
+        pairs.append(pair)
+    return pairs
