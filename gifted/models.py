@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from gifted import db
-from gifted.helpers import generate_code
 
 participants = db.Table('participants',
                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -23,11 +22,12 @@ class User(db.Model):
 
 class Invite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
     email = db.Column(db.String(80), nullable=False)
     is_valid = db.Column(db.Integer, default=1)
     created_on = db.Column(db.DateTime(), default=datetime.now())
     expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
-    code = db.Column(db.String(80), default=generate_code())
+    code = db.Column(db.String(80), nullable=False)
     is_used = db.Column(db.Integer, default=0)
 
     def __repr__(self):

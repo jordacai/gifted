@@ -1,7 +1,6 @@
-import itertools
 import random
 import string
-from copy import copy, deepcopy
+from copy import deepcopy
 from functools import wraps
 
 from flask import session, url_for, flash
@@ -34,63 +33,17 @@ def validate(username, password, password_confirm=None, redirect_to='views.login
         return redirect(url_for(redirect_to))
 
 
-def randomize(users):
-    pairs = []
-    ids = [user.id for user in users]
-    count = len(ids)
-    while count:
-        gifter = random.choice(ids)
-        giftee = random.choice(ids)
-        if gifter != giftee:
-            pairs.append({
-                'gifter': gifter,
-                'giftee': giftee
-            })
-            ids.remove(giftee)
-            count = count - 2
-    return pairs
-
-
-def matchmake(ids):
-    pairs = []
-    giftees = deepcopy(ids)
-    for gifter in ids:
-        add_back = False
-        if gifter in giftees:
-            giftees.remove(gifter)
-            add_back = True
-        # reached end of list with no gifter-giftee pair remaining
-        # i.e. every other pair got matched but one person
-        # scrap it and re-run
-        if len(giftees) == 0:
-            matchmake(ids)
-        else:
-            element = random.choice(giftees)
-            pair = {
-                'gifter': gifter,
-                'giftee': element
-            }
-            print(f'paired up {pair}')
-            pairs.append(pair)
-            giftees.remove(element)
-        if add_back:
-            giftees.append(gifter)
-
-    return pairs
-
-
-# todo: replace matchmake(), pass in list of users and unpack their ids
-def true_matchmake(gifters):
+def matchmake(gifters):
     pairs = []
     giftees = deepcopy(gifters)
     random.shuffle(giftees)
 
-    if gifters[-1] == giftees[0]:
-        print('last gifter is first giftee, would result in orphaned pair. reshuffling...')
-        return true_matchmake(gifters)
+    if gifters[-1].id == giftees[0].id:
+        return matchmake(gifters)
 
     for gifter in gifters:
-        if gifter == giftees[-1]:
+        # treat giftees as a stack: if the gifter is shuffled as the giftee, grab the next (i.e. pop(-2))
+        if gifter.id == giftees[-1].id:
             giftee = giftees.pop(-2)
         else:
             giftee = giftees.pop()

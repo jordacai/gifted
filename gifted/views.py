@@ -8,8 +8,8 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
-from gifted.helpers import randomize
-from gifted.models import User, Invite
+from gifted.helpers import generate_code
+from gifted.models import User, Invite, Event
 
 bp = Blueprint('views', __name__)
 
@@ -62,14 +62,25 @@ def register():
             return redirect(url_for('views.register'))
 
         invitation = Invite.query.filter_by(email=username, code=code).first()
+        event = Event.query.filter_by(id=invitation.id).first()
         if invitation is None:
             flash('This code and email combination is invalid!', 'error')
             return redirect(url_for('views.register'))
 
+        if datetime.now() > invitation.expires_on:
+            flash('This invitation has expired!', 'error')
+            return redirect(url_for('views.register'))
+
+        if event is None or datetime.now() > event.ends_on:
+            flash('This event has either expired or it has been deleted!', 'error')
+            return redirect(url_for('views.register'))
+
         user = User(username=username, password=security.generate_password_hash(password),
                     first_name=first_name, last_name=last_name)
-        db.session.add(user)
+
+        event.participants.append(user)
         invitation.is_used = 1
+        db.session.add(user)
         db.session.commit()
 
         flash('Account created successfully!', 'success')
@@ -81,13 +92,46 @@ def register():
 
 @bp.route('/admin')
 def admin():
-    users = User.query.order_by(User.id.desc()).all()
     invites = Invite.query.filter_by(is_valid=1).order_by(Invite.id.desc()).all()
-    return render_template('admin.html', users=users, invites=invites)
+    events = Event.query.order_by(Event.id.desc()).all()
+    return render_template('admin.html', events=events, invites=invites)
+
+
+@bp.route('/admin/events', methods=['GET', 'POST'])
+def get_events():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        starts_on = datetime.strptime(request.form.get('startsOn'), '%Y-%m-%d').date()
+        ends_on = datetime.strptime(request.form.get('endsOn'), '%Y-%m-%d').date()
+
+        event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
+        db.session.add(event)
+        db.session.commit()
+
+        flash('Event created successfully!', 'success')
+        return redirect(url_for('views.admin'))
+
+
+@bp.route('/admin/events/<event_id>')
+def get_event(event_id):
+    event = Event.query.filter_by(id=event_id).first()
+    return render_template('event.html', event=event)
+
+
+# todo: change urls to take path params w/ ids
+@bp.route('/admin/events/delete', methods=['POST'])
+def delete_event():
+    event_id = request.form.get('id')
+    event = Event.query.get(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash(f'Deleted event {event}!', 'success')
+    return redirect(url_for('views.admin'))
 
 
 @bp.route('/admin/users/delete', methods=['POST'])
-def delete():
+def delete_user():
     user_id = request.form.get('id')
     user = User.query.get(user_id)
     db.session.delete(user)
@@ -99,7 +143,9 @@ def delete():
 @bp.route('/admin/invites', methods=['POST'])
 def invite():
     email = request.form.get('email')
-    invitation = Invite(email=email)
+    event_id = request.form.get('eventId')
+    code = generate_code()
+    invitation = Invite(email=email, event_id=event_id, code=code)
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email}!', 'success')
@@ -114,21 +160,12 @@ def invite():
     return redirect(url_for('views.admin'))
 
 
-@bp.route('/admin/invites/revoke', methods=['POST'])
-def revoke():
-    invitation_id = request.form.get('id')
-    invitation = Invite.query.filter_by(id=invitation_id).first()
-    invitation.valid = 0
+@bp.route('/admin/invites/<invite_id>/revoke', methods=['POST'])
+def revoke(invite_id):
+    invitation = Invite.query.filter_by(id=invite_id).first()
+    invitation.is_valid = 0
     db.session.commit()
     flash(f'Revoked {invitation.email}\'s invitation', 'success')
-    return redirect(url_for('views.admin'))
-
-
-@bp.route('/admin/randomize')
-def matchmake():
-    users = User.query.order_by(User.id.asc()).all()
-    matches = randomize(users)
-    print(matches)
     return redirect(url_for('views.admin'))
 
 
