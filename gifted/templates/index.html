@@ -5,5 +5,20 @@ home
 {% endblock %}
 
 {% block main %}
-<h3>todo</h3>
+    {% for event in events %}
+        <div class="card-deck">
+            <div class="card mb-3 w-25">
+                <img class="card-img-top" src="/static/xmas-wrapping-paper.jpg" alt="event image">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.description }}</p>
+                    <p class="card-text">Open from <strong>{{ event.starts_on }}</strong> to <strong>{{ event.ends_on }}</strong></p>
+                    <a href="/events/{{ event.id }}" class="btn btn-primary">Go to event</a>
+                </div>
+                <div class="card-footer text-muted">
+                    created on {{ event.created_on }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}

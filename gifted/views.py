@@ -17,7 +17,9 @@ bp = Blueprint('views', __name__)
 @bp.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    user = get_logged_in_user()
+    events = user.events
+    return render_template('index.html', events=events)
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -35,6 +37,7 @@ def login():
         # password is valid, proceed to set session cookie and redirect to index
         # otherwise, flash a friendly message
         if security.check_password_hash(pwhash=user.password, password=password):
+            session['user_id'] = user.id
             session['username'] = request.form.get('username')
             session['is_admin'] = user.is_admin
             flash('Logged in successfully', 'success')
@@ -98,7 +101,7 @@ def admin():
 
 
 @bp.route('/admin/events', methods=['GET', 'POST'])
-def get_events():
+def create_event():
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -106,6 +109,8 @@ def get_events():
         ends_on = datetime.strptime(request.form.get('endsOn'), '%Y-%m-%d').date()
 
         event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
+        user = get_logged_in_user()
+        event.participants.append(user)
         db.session.add(event)
         db.session.commit()
 
@@ -114,9 +119,16 @@ def get_events():
 
 
 @bp.route('/admin/events/<event_id>')
+def admin_get_event(event_id):
+    event = Event.query.get(event_id)
+    return render_template('admin_event.html', event=event)
+
+
+@bp.route('/events/<event_id>')
 def get_event(event_id):
-    event = Event.query.filter_by(id=event_id).first()
-    return render_template('event.html', event=event)
+    event = Event.query.get(event_id)
+    participants = event.participants
+    return render_template('event.html', event=event, participants=participants)
 
 
 # todo: change urls to take path params w/ ids
@@ -171,7 +183,9 @@ def revoke(invite_id):
 
 @bp.route('/logout')
 def logout():
+    session.pop('user_id', None)
     session.pop('username', None)
+    session.pop('is_admin', None)
     return redirect(url_for('views.login'))
 
 
@@ -184,3 +198,7 @@ def pretty_boolean(i):
 def is_expired(expires_on):
     now = datetime.now()
     return True if now > expires_on else False
+
+
+def get_logged_in_user():
+    return User.query.filter_by(id=session['user_id']).first()

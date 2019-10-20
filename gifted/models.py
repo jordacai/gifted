@@ -6,6 +6,11 @@ participants = db.Table('participants',
                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
                         db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True))
 
+wishlist = db.Table('wishlist',
+                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                    db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
+                    db.Column('item_id', db.Integer, db.ForeignKey('item.id'), primary_key=True))
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +20,7 @@ class User(db.Model):
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
+    wishlist = db.relationship('Item', secondary=wishlist, lazy='subquery', backref=db.backref('items', lazy=True))
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
@@ -46,3 +52,12 @@ class Event(db.Model):
 
     def __repr__(self):
         return '<Event id=%r, title=%r>' % (self.id, self.title)
+
+
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(240), nullable=False)
+    price = db.Column(db.Numeric(4, 2), nullable=False)
+    location = db.Column(db.String(1024), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    priority = db.Column(db.Integer, default=3)

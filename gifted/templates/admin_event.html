@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+event
+{% endblock %}
+
+{% block main %}
+<h4>Users</h4>
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">username</th>
+                <th scope="col">name</th>
+                <th scope="col">registered on</th>
+                <th scope="col">admin?</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in event.participants %}
+            <tr>
+                <th scope="row">{{ user.id }}</th>
+                <td>{{ user.username }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.registered_on }}</td>
+                <td>{{ user.is_admin | pretty_boolean }}</td>
+                {% if user.is_admin == 0 %}
+                    <td>
+                        <form action="/admin/users/delete" method="post">
+                            <input hidden name="id" type="number" value="{{ user.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit">delete</button>
+                        </form>
+                    </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
