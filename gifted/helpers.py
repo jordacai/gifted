@@ -32,14 +32,14 @@ def validate(username, password, password_confirm=None, redirect_to='views.login
         flash('Passwords must match!', 'error')
         return redirect(url_for(redirect_to))
 
-
-def matchmake(gifters):
+# todo: remove?
+def helper_matchmake(gifters):
     pairs = []
     giftees = deepcopy(gifters)
     random.shuffle(giftees)
 
     if gifters[-1].id == giftees[0].id:
-        return matchmake(gifters)
+        return helper_matchmake(gifters)
 
     for gifter in gifters:
         # treat giftees as a stack: if the gifter is shuffled as the giftee, grab the next (i.e. pop(-2))

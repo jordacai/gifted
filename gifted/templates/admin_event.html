@@ -5,6 +5,19 @@ event
 {% endblock %}
 
 {% block main %}
+<div class="card w-75">
+    <div class="card-body">
+        <h5 class="card-title">{{ event.title }}</h5>
+        <p class="card-text">{{ event.description }}</p>
+        {% if not event.participants.buys_for %}
+        <p>Event is not shuffled!</p>
+        <form action="/admin/events/{{ event.id }}/matchmake" method="post">
+            <button class="btn btn-primary" type="submit">Shuffle gifters</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+<hr/>
 <h4>Users</h4>
     <table class="table">
         <thead class="thead-light">
@@ -27,8 +40,7 @@ event
                 <td>{{ user.is_admin | pretty_boolean }}</td>
                 {% if user.is_admin == 0 %}
                     <td>
-                        <form action="/admin/users/delete" method="post">
-                            <input hidden name="id" type="number" value="{{ user.id }}">
+                        <form action="/admin/users/{{ user.id }}/delete" method="post">
                             <button class="btn btn-danger btn-sm" type="submit">delete</button>
                         </form>
                     </td>

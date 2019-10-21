@@ -52,8 +52,7 @@ admin
                     <td>{{ event.starts_on }}</td>
                     <td>{{ event.ends_on }}</td>
                     <td>
-                        <form action="/admin/events/delete" method="post">
-                            <input hidden name="id" type="number" value="{{ event.id }}">
+                        <form action="/admin/events/{{ event.id }}/delete" method="post">
                             <button class="btn btn-danger btn-sm" type="submit">delete</button>
                         </form>
                     </td>

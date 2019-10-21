@@ -7,6 +7,13 @@ main .form-control
     width: auto;
 }
 
+main .card
+{
+    text-align: center;
+    width: auto;
+    display: inline-block;
+}
+
 main
 {
     /* scroll horizontally as needed */

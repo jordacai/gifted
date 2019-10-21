@@ -124,6 +124,20 @@ def admin_get_event(event_id):
     return render_template('admin_event.html', event=event)
 
 
+@bp.route('/admin/events/<event_id>/matchmake', methods=['POST'])
+def admin_matchmake(event_id):
+    event = Event.query.get(event_id)
+    people = event.participants
+    pairs = event.matchmake()
+
+    for participant in people:
+        id_ = participant.id
+        #x = participants.query.get(user_id=id_, event_id=event_id)
+        #print(x)
+        db.session.commit()
+    return render_template('admin_event.html', event=event)
+
+
 @bp.route('/events/<event_id>')
 def get_event(event_id):
     event = Event.query.get(event_id)
@@ -131,10 +145,8 @@ def get_event(event_id):
     return render_template('event.html', event=event, participants=participants)
 
 
-# todo: change urls to take path params w/ ids
-@bp.route('/admin/events/delete', methods=['POST'])
-def delete_event():
-    event_id = request.form.get('id')
+@bp.route('/admin/events/<event_id>/delete', methods=['POST'])
+def delete_event(event_id):
     event = Event.query.get(event_id)
     db.session.delete(event)
     db.session.commit()
@@ -142,9 +154,8 @@ def delete_event():
     return redirect(url_for('views.admin'))
 
 
-@bp.route('/admin/users/delete', methods=['POST'])
-def delete_user():
-    user_id = request.form.get('id')
+@bp.route('/admin/users/<user_id>/delete', methods=['POST'])
+def delete_user(user_id):
     user = User.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
@@ -198,6 +209,12 @@ def pretty_boolean(i):
 def is_expired(expires_on):
     now = datetime.now()
     return True if now > expires_on else False
+
+
+@bp.app_template_filter('is_active')
+def is_active(starts_on, ends_on):
+    now = datetime.now()
+    return True if starts_on < now < ends_on else False
 
 
 def get_logged_in_user():

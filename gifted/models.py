@@ -1,10 +1,13 @@
+import random
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 from gifted import db
 
 participants = db.Table('participants',
                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True))
+                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
+                        db.Column('buys_for', db.Integer, nullable=True))
 
 wishlist = db.Table('wishlist',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -53,6 +56,31 @@ class Event(db.Model):
     def __repr__(self):
         return '<Event id=%r, title=%r>' % (self.id, self.title)
 
+    def is_active(self):
+        now = datetime.now()
+        return True if self.starts_on < now < self.ends_on else False
+
+    def is_expired(self):
+        now = datetime.now()
+        return True if now > self.ends_on else False
+
+    def matchmake(self):
+        matches = {}
+        recipients = deepcopy(self.participants)
+        random.shuffle(recipients)
+
+        if self.participants[-1] == recipients[0]:
+            return self.matchmake()
+
+        for participant in self.participants:
+            # treat recipients as a stack: if the participant is shuffled as the recipient, grab the next (i.e. pop(-2))
+            if participant.id == recipients[-1].id:
+                recipient = recipients.pop(-2)
+            else:
+                recipient = recipients.pop()
+            matches[participant.id] = recipient.id
+        return matches
+
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,3 +89,8 @@ class Item(db.Model):
     location = db.Column(db.String(1024), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.Integer, default=3)
+    is_purchased = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return '<Item id=%r, description=%r, price=%r>' % (self.id, self.description, self.price)
+

@@ -12,11 +12,15 @@ home
                 <div class="card-body">
                     <h5 class="card-title">{{ event.title }}</h5>
                     <p class="card-text">{{ event.description }}</p>
-                    <p class="card-text">Open from <strong>{{ event.starts_on }}</strong> to <strong>{{ event.ends_on }}</strong></p>
+                    {% if event.is_active %}
+                        <h6>Event is active!</h6>
+                    {% elif event.is_expired %}
+                        <p>This event ended on {{ event.ends_on }}</p>
+                    {% endif %}
                     <a href="/events/{{ event.id }}" class="btn btn-primary">Go to event</a>
                 </div>
                 <div class="card-footer text-muted">
-                    created on {{ event.created_on }}
+                    Event ends on {{ event.ends_on }}
                 </div>
             </div>
         </div>
