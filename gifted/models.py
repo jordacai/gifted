@@ -1,13 +1,12 @@
 import random
-from copy import deepcopy
+from copy import copy
 from datetime import datetime, timedelta
 
 from gifted import db
 
 participants = db.Table('participants',
                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
-                        db.Column('buys_for', db.Integer, nullable=True))
+                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True))
 
 wishlist = db.Table('wishlist',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -50,8 +49,10 @@ class Event(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.now())
     starts_on = db.Column(db.DateTime())
     ends_on = db.Column(db.DateTime())
-    participants = db.relationship('User', secondary=participants, lazy='subquery',
-                                   backref=db.backref('events', lazy=True))
+    users = db.relationship('User', secondary=participants, lazy='subquery',
+                            backref=db.backref('events', lazy=True))
+    gifters = db.relationship('Gifter', lazy='subquery',
+                              backref=db.backref('event', lazy='subquery'))
 
     def __repr__(self):
         return '<Event id=%r, title=%r>' % (self.id, self.title)
@@ -66,20 +67,32 @@ class Event(db.Model):
 
     def matchmake(self):
         matches = {}
-        recipients = deepcopy(self.participants)
+        recipients = copy(self.users)
         random.shuffle(recipients)
 
-        if self.participants[-1] == recipients[0]:
+        if len(self.users) == 0:
+            return None
+
+        if self.users[-1].id == recipients[0].id:
             return self.matchmake()
 
-        for participant in self.participants:
-            # treat recipients as a stack: if the participant is shuffled as the recipient, grab the next (i.e. pop(-2))
-            if participant.id == recipients[-1].id:
+        for user in self.users:
+            # treat recipients as a stack: if the user is shuffled as the recipient, grab the next (i.e. pop(-2))
+            if user.id == recipients[-1].id:
                 recipient = recipients.pop(-2)
             else:
                 recipient = recipients.pop()
-            matches[participant.id] = recipient.id
+            matches[user.id] = recipient.id
         return matches
+
+
+class Gifter(db.Model):
+    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
+    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return '<Gifter %r buys for %r>' % (self.gifter_id, self.giftee_id)
 
 
 class Item(db.Model):

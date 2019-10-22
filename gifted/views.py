@@ -9,7 +9,7 @@ from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
 from gifted.helpers import generate_code
-from gifted.models import User, Invite, Event
+from gifted.models import User, Invite, Event, Gifter
 
 bp = Blueprint('views', __name__)
 
@@ -81,7 +81,7 @@ def register():
         user = User(username=username, password=security.generate_password_hash(password),
                     first_name=first_name, last_name=last_name)
 
-        event.participants.append(user)
+        event.users.append(user)
         invitation.is_used = 1
         db.session.add(user)
         db.session.commit()
@@ -110,7 +110,7 @@ def create_event():
 
         event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
         user = get_logged_in_user()
-        event.participants.append(user)
+        event.users.append(user)
         db.session.add(event)
         db.session.commit()
 
@@ -127,22 +127,24 @@ def admin_get_event(event_id):
 @bp.route('/admin/events/<event_id>/matchmake', methods=['POST'])
 def admin_matchmake(event_id):
     event = Event.query.get(event_id)
-    people = event.participants
     pairs = event.matchmake()
-
-    for participant in people:
-        id_ = participant.id
-        #x = participants.query.get(user_id=id_, event_id=event_id)
-        #print(x)
-        db.session.commit()
+    for gifter_id, giftee_id in pairs.items():
+        gifter = Gifter.query.filter_by(gifter_id=gifter_id).first()
+        if gifter is None:
+            gifter = Gifter(gifter_id=gifter_id, giftee_id=giftee_id, event_id=event.id)
+            db.session.add(gifter)
+        else:
+            gifter.giftee_id = giftee_id
+    db.session.commit()
+    print(event.gifters)
     return render_template('admin_event.html', event=event)
 
 
 @bp.route('/events/<event_id>')
 def get_event(event_id):
     event = Event.query.get(event_id)
-    participants = event.participants
-    return render_template('event.html', event=event, participants=participants)
+    users = event.users
+    return render_template('event.html', event=event, users=users)
 
 
 @bp.route('/admin/events/<event_id>/delete', methods=['POST'])
