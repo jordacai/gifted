@@ -5,17 +5,17 @@ wishlist
 {% endblock %}
 
 {% block main %}
-{% if user.id == session['user_id'] %}
+{% if user.id == me.id %}
 <form action="{{ request.path }}" method="post">
     <div class="form-row mb-3 justify-content-center">
         <div class="input-group col-sm">
-            <input name="description" type="text" class="form-control" placeholder="description" aria-label="description">
+            <input name="description" type="text" class="form-control" placeholder="description" autocomplete="off" aria-label="description">
         </div>
         <div class="input-group col-sm">
             <div class="input-group-prepend">
                 <span class="input-group-text" id="at">@</span>
             </div>
-            <input name="location" type="text" class="form-control" placeholder="location" aria-label="location" aria-describedby="at">
+            <input name="location" type="text" class="form-control" placeholder="location" autocomplete="off" aria-label="location" aria-describedby="at">
         </div>
     </div>
     <div class="form-row mb-3 justify-content-center">
@@ -54,10 +54,18 @@ wishlist
         </tr>
     </thead>
     <tbody>
-        {% for item in wishlist %}
-        {% if item.is_purchased %}
+    {% for item in wishlist %}
+        {% if item.user_id == me.id %}
+        <tr>
+            <td>
+                <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
+                    <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
+                    <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                </form>
+            </td>
+        {% elif item.is_purchased %}
         <tr class="table-success">
-            {% if item.transaction in my_transactions %}
+            {% if item.transaction in me.transactions %}
             <td>
                 <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
                     <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
@@ -86,7 +94,8 @@ wishlist
             <td>{{ item.quantity }}</td>
             <td>{{ item.priority }}</td>
         </tr>
-        {% endfor %}
+    {% endfor %}
     </tbody>
 </table>
+<a href="/">back to home</a>
 {% endblock %}

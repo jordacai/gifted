@@ -10,18 +10,23 @@ event
             <div class="card-body">
                 <h5 class="card-title">{{ event.title }}</h5>
                 <p class="card-text">{{ event.description }}</p>
-                <a href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}" class="btn btn-primary">View my wishlist</a>
+                <a href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}" class="btn btn-primary mb-3">View my wishlist</a>
+                <p>You are on the hook for ${{ hook }}</p>
             </div>
         </div>
     </div>
     {% for user in event.users %}
-        {% if user.id != session['user_id'] %}
-            {% if user.id == get_giftee(event.id, session['user_id']) %}
+        {% if user.id != logged_in_user.id %}
+            {% if user.id == logged_in_user.pair.giftee_id %}
                 <div class="card border-primary mb-3" style="width: 18rem;">
-                    <div class="card-header">This is your person!</div>
+                    <div class="card-header"><strong>This is your person!</strong></div>
                     <div class="card-body">
                         <h5 class="card-title text-primary">{{ user.first_name }}</h5>
-                        <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+                        {% if progress.get(user.id).percent == 100 %}
+                            <p>wishlist is complete!</p>
+                        {% else %}
+                            <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+                        {% endif %}
                             <div class="progress mb-3">
                                 <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
                                    style="width: {{ progress.get(user.id).percent}}%" aria-valuenow="{{ progress.get(user.id).percent }}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -33,7 +38,11 @@ event
                 <div class="card mb-3" style="width: 18rem;">
                     <div class="card-body">
                         <h5 class="card-title">{{ user.first_name }}</h5>
-                        <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+                        {% if progress.get(user.id).percent == 100 %}
+                            <p>wishlist is complete!</p>
+                        {% else %}
+                            <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+                        {% endif %}
                             <div class="progress mb-3">
                                 <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
                                    style="width: {{ progress.get(user.id).percent}}%" aria-valuenow="{{ progress.get(user.id).percent }}" aria-valuemin="0" aria-valuemax="100"></div>

@@ -27,9 +27,12 @@ def create_app():
     except OSError:
         pass
 
-    from . import views
-    app.register_blueprint(views.bp)
-    return app
+    with app.app_context():
+        from .admin.routes import admin
+        from .main.routes import main
+        app.register_blueprint(admin)
+        app.register_blueprint(main)
+        return app
 
 
 if __name__ == '__main__':

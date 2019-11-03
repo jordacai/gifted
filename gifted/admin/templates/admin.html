@@ -14,7 +14,6 @@ admin
                 <tr>
                     <th scope="col">id</th>
                     <th scope="col">title</th>
-                    <th scope="col">created on</th>
                     <th scope="col">starts on</th>
                     <th scope="col">ends on</th>
                     <th scope="col"></th>
@@ -25,7 +24,6 @@ admin
                 <tr>
                     <th scope="row">{{ event.id }}</th>
                     <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
-                    <td>{{ event.created_on }}</td>
                     <td>{{ event.starts_on }}</td>
                     <td>{{ event.ends_on }}</td>
                     <td>
@@ -47,8 +45,6 @@ admin
                 <tr>
                     <th scope="col">id</th>
                     <th scope="col">email</th>
-                    <th scope="col">event</th>
-                    <th scope="col">created</th>
                     <th scope="col">expired</th>
                     <th scope="col">code</th>
                     <th scope="col">used</th>
@@ -60,8 +56,6 @@ admin
                 <tr>
                     <th scope="row">{{ invite.id }}</th>
                     <td>{{ invite.email }}</td>
-                    <td>{{ invite.event_id }}</td>
-                    <td>{{ invite.created_on }}</td>
                     <td>{{ invite.expires_on | is_expired }}</td>
                     <td>{{ invite.code }}</td>
                     <td>{{ invite.is_used | pretty_boolean }}</td>

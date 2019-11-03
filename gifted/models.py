@@ -1,4 +1,5 @@
 import random
+import string
 from copy import copy
 from datetime import datetime, timedelta
 
@@ -9,10 +10,14 @@ event_user = db.Table('event_user',
                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
 
+def generate_code(size=8, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id', ondelete='CASCADE'))
     gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     transacted_on = db.Column(db.DateTime(), default=datetime.now())
@@ -20,6 +25,15 @@ class Transaction(db.Model):
     def __repr__(self):
         return '<Transaction id=%r, event_id=%r, item_id=%r, gifter_id=%r, giftee_id=%r>' % \
                (self.id, self.event_id, self.item_id, self.gifter_id, self.giftee_id)
+
+
+class Pair(db.Model):
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
+    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)
 
 
 class User(db.Model):
@@ -31,6 +45,7 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
     transactions = db.relationship('Transaction', backref='user', foreign_keys=[Transaction.gifter_id])
+    pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
@@ -43,7 +58,7 @@ class Invite(db.Model):
     is_valid = db.Column(db.Integer, default=1)
     created_on = db.Column(db.DateTime(), default=datetime.now())
     expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
-    code = db.Column(db.String(80), nullable=False)
+    code = db.Column(db.String(80), nullable=False, default=generate_code())
     is_used = db.Column(db.Integer, default=0)
 
     def __repr__(self):
@@ -101,15 +116,6 @@ class Event(db.Model):
             db.session.commit()
 
 
-class Pair(db.Model):
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
-    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __repr__(self):
-        return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)
-
-
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
@@ -120,8 +126,7 @@ class Item(db.Model):
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.Integer, default=3)
     is_purchased = db.Column(db.Integer, default=0)
-    transaction = db.relationship('Transaction', uselist=False, backref='item')
+    transaction = db.relationship('Transaction', uselist=False, backref='item', cascade='all,delete')
 
     def __repr__(self):
         return '<Item id=%r, description=%r, price=%r>' % (self.id, self.description, self.price)
-
