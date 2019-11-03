@@ -38,6 +38,43 @@ admin
             </tbody>
         </table>
     {% endif %}
+<h4>Invites</h4>
+    {% if not invites %}
+        <p>No invites pending</p>
+    {% else %}
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">email</th>
+                    <th scope="col">event</th>
+                    <th scope="col">created</th>
+                    <th scope="col">expired</th>
+                    <th scope="col">code</th>
+                    <th scope="col">used</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invite in invites %}
+                <tr>
+                    <th scope="row">{{ invite.id }}</th>
+                    <td>{{ invite.email }}</td>
+                    <td>{{ invite.event_id }}</td>
+                    <td>{{ invite.created_on }}</td>
+                    <td>{{ invite.expires_on | is_expired }}</td>
+                    <td>{{ invite.code }}</td>
+                    <td>{{ invite.is_used | pretty_boolean }}</td>
+                    <td>
+                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
+                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 <h6>Create a new event</h6>
     <form action="/admin/events" method="post">
         <div class="form-row justify-content-center">
@@ -84,41 +121,4 @@ admin
         </div>
     </form>
 <hr/>
-<h4>Invites</h4>
-    {% if not invites %}
-        <p>No invites pending</p>
-    {% else %}
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">id</th>
-                    <th scope="col">email</th>
-                    <th scope="col">event</th>
-                    <th scope="col">created</th>
-                    <th scope="col">expired</th>
-                    <th scope="col">code</th>
-                    <th scope="col">used</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invite in invites %}
-                <tr>
-                    <th scope="row">{{ invite.id }}</th>
-                    <td>{{ invite.email }}</td>
-                    <td>{{ invite.event_id }}</td>
-                    <td>{{ invite.created_on }}</td>
-                    <td>{{ invite.expires_on | is_expired }}</td>
-                    <td>{{ invite.code }}</td>
-                    <td>{{ invite.is_used | pretty_boolean }}</td>
-                    <td>
-                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
-                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
 {% endblock %}

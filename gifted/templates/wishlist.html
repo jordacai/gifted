@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+wishlist
+{% endblock %}
+
+{% block main %}
+{% if user.id == session['user_id'] %}
+<form action="{{ request.path }}" method="post">
+    <div class="form-row mb-3 justify-content-center">
+        <div class="input-group col-sm">
+            <input name="description" type="text" class="form-control" placeholder="description" aria-label="description">
+        </div>
+        <div class="input-group col-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="at">@</span>
+            </div>
+            <input name="location" type="text" class="form-control" placeholder="location" aria-label="location" aria-describedby="at">
+        </div>
+    </div>
+    <div class="form-row mb-3 justify-content-center">
+        <div class="input-group col-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">$</span>
+            </div>
+            <input name="price" type="text" class="form-control" placeholder="price">
+        </div>
+        <div class="input-group col-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">#</span>
+            </div>
+            <input name="quantity" type="number" class="form-control" placeholder="quantity">
+        </div>
+        <div class="input-group col-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">!</span>
+            </div>
+            <input name="priority" type="number" class="form-control" placeholder="priority">
+        </div>
+    </div>
+    <button class="btn btn-primary mb-5" type="submit">Add to wishlist</button>
+</form>
+{% endif %}
+<h5>Wishlist</h5>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">description</th>
+            <th scope="col">location</th>
+            <th scope="col">price</th>
+            <th scope="col">quantity</th>
+            <th scope="col">priority</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in wishlist %}
+        {% if item.is_purchased %}
+        <tr class="table-success">
+        {% else %}
+        <tr>
+        {% endif %}
+            <td>{{ item.description }}</td>
+            <td>{{ item.location }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.priority }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

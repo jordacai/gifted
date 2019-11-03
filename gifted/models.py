@@ -4,14 +4,9 @@ from datetime import datetime, timedelta
 
 from gifted import db
 
-participants = db.Table('participants',
-                        db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                        db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True))
-
-wishlist = db.Table('wishlist',
-                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                    db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
-                    db.Column('item_id', db.Integer, db.ForeignKey('item.id'), primary_key=True))
+event_user = db.Table('event_user',
+                      db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+                      db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
 
 class User(db.Model):
@@ -22,7 +17,6 @@ class User(db.Model):
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
-    wishlist = db.relationship('Item', secondary=wishlist, lazy='subquery', backref=db.backref('items', lazy=True))
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
@@ -49,10 +43,11 @@ class Event(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.now())
     starts_on = db.Column(db.DateTime())
     ends_on = db.Column(db.DateTime())
-    users = db.relationship('User', secondary=participants, lazy='subquery',
-                            backref=db.backref('events', lazy=True))
-    gifters = db.relationship('Gifter', lazy='subquery',
-                              backref=db.backref('event', lazy='subquery'))
+    users = db.relationship('User',
+                            secondary=event_user,
+                            backref=db.backref('events', lazy=True),
+                            lazy=True)
+    pairs = db.relationship('Pair', backref='event', lazy=True)
 
     def __repr__(self):
         return '<Event id=%r, title=%r>' % (self.id, self.title)
@@ -66,39 +61,47 @@ class Event(db.Model):
         return True if now > self.ends_on else False
 
     def matchmake(self):
-        matches = {}
-        recipients = copy(self.users)
-        random.shuffle(recipients)
+        giftees = copy(self.users)
+        random.shuffle(giftees)
 
         if len(self.users) == 0:
             return None
 
-        if self.users[-1].id == recipients[0].id:
+        if self.users[-1].id == giftees[0].id:
             return self.matchmake()
 
-        for user in self.users:
+        for gifter in self.users:
             # treat recipients as a stack: if the user is shuffled as the recipient, grab the next (i.e. pop(-2))
-            if user.id == recipients[-1].id:
-                recipient = recipients.pop(-2)
+            if gifter.id == giftees[-1].id:
+                giftee = giftees.pop(-2)
             else:
-                recipient = recipients.pop()
-            matches[user.id] = recipient.id
-        return matches
+                giftee = giftees.pop()
+
+            pair = Pair.query.filter_by(event_id=self.id, gifter_id=gifter.id).first()
+            if pair is not None:
+                pair.giftee_id = giftee.id
+            else:
+                pair = Pair(event_id=self.id, gifter_id=gifter.id, giftee_id=giftee.id)
+
+            db.session.add(pair)
+            db.session.commit()
 
 
-class Gifter(db.Model):
-    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
-    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True, nullable=False)
+class Pair(db.Model):
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
+    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '<Gifter %r buys for %r>' % (self.gifter_id, self.giftee_id)
+        return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)
 
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     description = db.Column(db.String(240), nullable=False)
-    price = db.Column(db.Numeric(4, 2), nullable=False)
+    price = db.Column(db.String(10), nullable=False)
     location = db.Column(db.String(1024), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.Integer, default=3)
@@ -106,4 +109,3 @@ class Item(db.Model):
 
     def __repr__(self):
         return '<Item id=%r, description=%r, price=%r>' % (self.id, self.description, self.price)
-

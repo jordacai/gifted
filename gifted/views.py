@@ -4,12 +4,13 @@ from flask import (
     Blueprint, flash, render_template, request, session,
     url_for, current_app)
 from flask_mail import Message
+from sqlalchemy import func
 from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
 from gifted.helpers import generate_code
-from gifted.models import User, Invite, Event, Gifter
+from gifted.models import User, Invite, Event, Pair, Item
 
 bp = Blueprint('views', __name__)
 
@@ -127,24 +128,50 @@ def admin_get_event(event_id):
 @bp.route('/admin/events/<event_id>/matchmake', methods=['POST'])
 def admin_matchmake(event_id):
     event = Event.query.get(event_id)
-    pairs = event.matchmake()
-    for gifter_id, giftee_id in pairs.items():
-        gifter = Gifter.query.filter_by(gifter_id=gifter_id).first()
-        if gifter is None:
-            gifter = Gifter(gifter_id=gifter_id, giftee_id=giftee_id, event_id=event.id)
-            db.session.add(gifter)
-        else:
-            gifter.giftee_id = giftee_id
-    db.session.commit()
-    print(event.gifters)
+    event.matchmake()
+    flash('Shuffled users!', 'success')
     return render_template('admin_event.html', event=event)
 
 
 @bp.route('/events/<event_id>')
 def get_event(event_id):
     event = Event.query.get(event_id)
-    users = event.users
-    return render_template('event.html', event=event, users=users)
+    user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
+        .filter_by(event_id=event_id).group_by(Item.user_id).all()
+    progress = {}
+    for row in user_total_result:
+        user_id = row[0]
+        total = row[1]
+        user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased'))\
+            .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
+        if user_purchased_result is None:
+            progress[user_id] = {'purchased': 0, 'total': row[1], 'percent': 0}
+        else:
+            purchased = user_purchased_result[0]
+            percent = purchased / total * 100
+            progress[user_id] = {'purchased': purchased, 'total': total, 'percent': percent}
+    print(progress)
+    return render_template('event.html', event=event, progress=progress, get_giftee=get_giftee)
+
+
+@bp.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
+def get_wishlist(event_id, user_id):
+    if request.method == 'POST':
+        description = request.form.get('description')
+        location = request.form.get('location')
+        price = request.form.get('price')
+        quantity = request.form.get('quantity')
+        priority = request.form.get('priority')
+
+        item = Item(description=description, location=location, price=price, quantity=quantity, priority=priority,
+                    event_id=event_id, user_id=user_id)
+        db.session.add(item)
+        db.session.commit()
+        return redirect(url_for('views.get_wishlist', event_id=event_id, user_id=user_id))
+
+    user = User.query.get(user_id)
+    wishlist = Item.query.filter_by(event_id=event_id, user_id=user_id)
+    return render_template('wishlist.html', user=user, wishlist=wishlist)
 
 
 @bp.route('/admin/events/<event_id>/delete', methods=['POST'])
@@ -221,3 +248,8 @@ def is_active(starts_on, ends_on):
 
 def get_logged_in_user():
     return User.query.filter_by(id=session['user_id']).first()
+
+
+def get_giftee(event_id, gifter_id):
+    pair = Pair.query.filter_by(event_id=event_id, gifter_id=gifter_id).first()
+    return pair.giftee_id
