@@ -9,6 +9,19 @@ event_user = db.Table('event_user',
                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
 
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    transacted_on = db.Column(db.DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return '<Transaction id=%r, event_id=%r, item_id=%r, gifter_id=%r, giftee_id=%r>' % \
+               (self.id, self.event_id, self.item_id, self.gifter_id, self.giftee_id)
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -17,6 +30,7 @@ class User(db.Model):
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
+    transactions = db.relationship('Transaction', backref='user', foreign_keys=[Transaction.gifter_id])
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
@@ -106,6 +120,8 @@ class Item(db.Model):
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.Integer, default=3)
     is_purchased = db.Column(db.Integer, default=0)
+    transaction = db.relationship('Transaction', uselist=False, backref='item')
 
     def __repr__(self):
         return '<Item id=%r, description=%r, price=%r>' % (self.id, self.description, self.price)
+

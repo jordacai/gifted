@@ -41,10 +41,11 @@ wishlist
     <button class="btn btn-primary mb-5" type="submit">Add to wishlist</button>
 </form>
 {% endif %}
-<h5>Wishlist</h5>
+<h5>{{ user.first_name }}'s Wishlist</h5>
 <table class="table table-hover">
     <thead>
         <tr>
+            <th scope="col">status</th>
             <th scope="col">description</th>
             <th scope="col">location</th>
             <th scope="col">price</th>
@@ -56,11 +57,31 @@ wishlist
         {% for item in wishlist %}
         {% if item.is_purchased %}
         <tr class="table-success">
+            {% if item.transaction in my_transactions %}
+            <td>
+                <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
+                    <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
+                    <button class="btn btn-danger btn-sm" type="submit">Unclaim</button>
+                </form>
+            </td>
+            {% else %}
+            <td>
+                <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
+            </td>
+            {% endif %}
         {% else %}
         <tr>
+            <td>
+                <form action="{{ request.path }}/transactions" method="post">
+                    <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
+                    <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
+                    <button class="btn btn-primary btn-sm" type="submit">Claim!</button>
+                </form>
+            </td>
         {% endif %}
             <td>{{ item.description }}</td>
-            <td>{{ item.location }}</td>
+            <td><abbr title="{{ item.location }}"><a href="{{ item.location }}">{{ item.location }}</a></abbr></td>
             <td>{{ item.price }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.priority }}</td>

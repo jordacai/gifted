@@ -10,7 +10,7 @@ from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
 from gifted.helpers import generate_code
-from gifted.models import User, Invite, Event, Pair, Item
+from gifted.models import User, Invite, Event, Pair, Item, Transaction
 
 bp = Blueprint('views', __name__)
 
@@ -150,7 +150,6 @@ def get_event(event_id):
             purchased = user_purchased_result[0]
             percent = purchased / total * 100
             progress[user_id] = {'purchased': purchased, 'total': total, 'percent': percent}
-    print(progress)
     return render_template('event.html', event=event, progress=progress, get_giftee=get_giftee)
 
 
@@ -171,7 +170,36 @@ def get_wishlist(event_id, user_id):
 
     user = User.query.get(user_id)
     wishlist = Item.query.filter_by(event_id=event_id, user_id=user_id)
-    return render_template('wishlist.html', user=user, wishlist=wishlist)
+    me = User.query.get(session['user_id'])
+    return render_template('wishlist.html', user=user, wishlist=wishlist, my_transactions=me.transactions)
+
+
+@bp.route('/events/<event_id>/wishlists/<user_id>/transactions', methods=['POST'])
+def claim_item(event_id, user_id):
+    item_id = request.form.get('item_id')
+    gifter_id = request.form.get('gifter_id')
+    giftee_id = request.form.get('giftee_id')
+
+    item = Item.query.get(item_id)
+    transaction = Transaction(event_id=event_id, item_id=item_id, gifter_id=gifter_id, giftee_id=giftee_id)
+    db.session.add(transaction)
+    item.is_purchased = 1
+    db.session.commit()
+
+    flash('You claimed an item!', 'success')
+    return redirect(url_for('views.get_wishlist', event_id=event_id, user_id=user_id))
+
+
+@bp.route('/events/<event_id>/wishlists/<user_id>/transactions/<transaction_id>/delete', methods=['POST'])
+def unclaim_item(event_id, user_id, transaction_id):
+    transaction_id = request.form.get('transaction_id')
+    transaction = Transaction.query.get(transaction_id)
+    item = transaction.item
+    db.session.delete(transaction)
+    item.is_purchased = 0
+    db.session.commit()
+    flash('You unclaimed an item!', 'error')
+    return redirect(url_for('views.get_wishlist', event_id=event_id, user_id=user_id))
 
 
 @bp.route('/admin/events/<event_id>/delete', methods=['POST'])
