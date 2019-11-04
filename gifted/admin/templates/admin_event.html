@@ -5,7 +5,7 @@ event
 {% endblock %}
 
 {% block main %}
-<div class="card w-75">
+<div class="card w-75 mb-3">
     <div class="card-body">
         <h5 class="card-title">{{ event.title }}</h5>
         <p class="card-text">{{ event.description }}</p>
@@ -18,7 +18,6 @@ event
         {% endif %}
     </div>
 </div>
-<hr/>
 {% if event.users %}
 <h4>Users</h4>
     <table class="table">
@@ -51,5 +50,44 @@ event
             {% endfor %}
         </tbody>
     </table>
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
+  Add ad-hoc user
+</button>
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel">Add a user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/events/{{ event.id }}/users" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input class="form-control" name="username" placeholder="username (email)" type="text" autocomplete="off" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="password" placeholder="password" type="password" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="passwordConfirm" placeholder="confirm your password" type="password" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="firstName" placeholder="first name" type="text">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="lastName" placeholder="last name" type="text">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create user</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endif %}
 {% endblock %}

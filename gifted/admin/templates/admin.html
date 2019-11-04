@@ -6,113 +6,150 @@ admin
 
 {% block main %}
 <h4>Events</h4>
-    {% if not events %}
-        <p>No active events</p>
-    {% else %}
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">id</th>
-                    <th scope="col">title</th>
-                    <th scope="col">starts on</th>
-                    <th scope="col">ends on</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for event in events %}
-                <tr>
-                    <th scope="row">{{ event.id }}</th>
-                    <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
-                    <td>{{ event.starts_on }}</td>
-                    <td>{{ event.ends_on }}</td>
-                    <td>
-                        <form action="/admin/events/{{ event.id }}/delete" method="post">
-                            <button class="btn btn-danger btn-sm" type="submit">delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-<h4>Invites</h4>
-    {% if not invites %}
-        <p>No invites pending</p>
-    {% else %}
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">id</th>
-                    <th scope="col">email</th>
-                    <th scope="col">expired</th>
-                    <th scope="col">code</th>
-                    <th scope="col">used</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invite in invites %}
-                <tr>
-                    <th scope="row">{{ invite.id }}</th>
-                    <td>{{ invite.email }}</td>
-                    <td>{{ invite.expires_on | is_expired }}</td>
-                    <td>{{ invite.code }}</td>
-                    <td>{{ invite.is_used | pretty_boolean }}</td>
-                    <td>
-                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
-                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-<h6>Create a new event</h6>
-    <form action="/admin/events" method="post">
-        <div class="form-row justify-content-center">
-            <div class="col-auto">
-                <input class="form-control" name="title" placeholder="title" type="text" autocomplete="off" autofocus>
+{% if not events %}
+    <p>No active events</p>
+{% else %}
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">title</th>
+                <th scope="col">starts on</th>
+                <th scope="col">ends on</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <th scope="row">{{ event.id }}</th>
+                <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
+                <td>{{ event.starts_on }}</td>
+                <td>{{ event.ends_on }}</td>
+                <td>
+                    <form action="/admin/events/{{ event.id }}/delete" method="post">
+                        <button class="btn btn-danger btn-sm" type="submit">delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#eventModal">
+  Create an event
+</button>
+<div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">Create a new event</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="col-auto">
-                <input class="form-control" name="description" placeholder="description">
-            </div>
-            <div class="col-auto">
-                <input class="form-control" name="startsOn" placeholder="event start" type="date" aria-labelledby="startHelp">
-                <small id="startHelp" class="form-text text-muted">Event start</small>
-            </div>
-            <div class="col-auto">
-                <input class="form-control" name="endsOn" placeholder="event end" type="date" aria-labelledby="endHelp">
-                <small id="endHelp" class="form-text text-muted">Event end</small>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" type="submit">create</button>
-            </div>
-        </div>
-    </form>
-<hr/>
-<h6>Invite someone to an event</h6>
-    <form action="/admin/invites" method="post">
-        <div class="form-row justify-content-center">
-            <div class="col-3">
-                <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
-            </div>
-            <div class="input-group col-6">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="eventSelect">event</label>
+            <form action="/admin/events" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input class="form-control" name="title" placeholder="title" type="text" autocomplete="off" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="description" placeholder="description" type="text" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" name="startsOn" placeholder="event start" type="date" aria-labelledby="startHelp">
+                        <small id="startHelp" class="form-text text-muted">Event start</small>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-auto">
+                            <input class="form-control" name="endsOn" placeholder="event end" type="date" aria-labelledby="endHelp">
+                            <small id="endHelp" class="form-text text-muted">Event end</small>
+                        </div>
+                    </div>
                 </div>
-                <select class="custom-select" id="eventSelect" name="eventId">
-                    <option selected>Pick an event...</option>
-                    {% for event in events %}
-                        <option value="{{ event.id }}">{{ event.title }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" type="submit">invite</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create event</button>
+                </div>
+            </form>
         </div>
-    </form>
-<hr/>
+    </div>
+</div>
+
+<h4>Invites</h4>
+{% if not invites %}
+    <p>No invites pending</p>
+{% else %}
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">email</th>
+                <th scope="col">expired</th>
+                <th scope="col">code</th>
+                <th scope="col">used</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invite in invites %}
+            <tr>
+                <th scope="row">{{ invite.id }}</th>
+                <td>{{ invite.email }}</td>
+                <td>{{ invite.expires_on | is_expired }}</td>
+                <td>{{ invite.code }}</td>
+                <td>{{ invite.is_used | pretty_boolean }}</td>
+                <td>
+                    <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
+                        <button class="btn btn-danger btn-sm" type="submit">revoke</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
+  Invite someone
+</button>
+<div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteModalLabel">Invite someone to an event</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/invites" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group col-sm">
+                            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group col-sm">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="eventSelect">event</label>
+                            </div>
+                            <select class="custom-select" id="eventSelect" name="eventId">
+                                <option selected>Pick an event...</option>
+                                {% for event in events %}
+                                    <option value="{{ event.id }}">{{ event.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Invite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
