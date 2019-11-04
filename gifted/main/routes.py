@@ -173,7 +173,7 @@ def unclaim_item(event_id, user_id, transaction_id):
     item.is_purchased = 0
     db.session.commit()
     flash('You unclaimed an item!', 'error')
-    return redirect(url_for('main.get_wishlist', event_id=event_id, user_id=user_id))
+    return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
 
 @main.route('/logout')
