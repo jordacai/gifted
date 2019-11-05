@@ -46,8 +46,10 @@ def get_event(event_id):
 
 @admin.route('/admin/events/<event_id>/matchmake', methods=['POST'])
 def matchmake(event_id):
+    users_to_shuffle = request.form.getlist('shuffledUsers')
     event = Event.query.get(event_id)
-    event.matchmake()
+    print(event.pairs)
+    event.matchmake(users_to_shuffle)
     flash('Shuffled users!', 'success')
     return render_template('admin_event.html', event=event)
 

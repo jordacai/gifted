@@ -12,7 +12,6 @@ admin
     <table class="table">
         <thead class="thead-light">
             <tr>
-                <th scope="col">id</th>
                 <th scope="col">title</th>
                 <th scope="col">starts on</th>
                 <th scope="col">ends on</th>
@@ -22,7 +21,6 @@ admin
         <tbody>
             {% for event in events %}
             <tr>
-                <th scope="row">{{ event.id }}</th>
                 <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
                 <td>{{ event.starts_on }}</td>
                 <td>{{ event.ends_on }}</td>
@@ -84,7 +82,6 @@ admin
     <table class="table">
         <thead class="thead-light">
             <tr>
-                <th scope="col">id</th>
                 <th scope="col">email</th>
                 <th scope="col">expired</th>
                 <th scope="col">code</th>
@@ -95,7 +92,6 @@ admin
         <tbody>
             {% for invite in invites %}
             <tr>
-                <th scope="row">{{ invite.id }}</th>
                 <td>{{ invite.email }}</td>
                 <td>{{ invite.expires_on | is_expired }}</td>
                 <td>{{ invite.code }}</td>

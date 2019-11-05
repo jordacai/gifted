@@ -89,28 +89,28 @@ class Event(db.Model):
         now = datetime.now()
         return True if now > self.ends_on else False
 
-    def matchmake(self):
-        giftees = copy(self.users)
+    def matchmake(self, users):
+        giftees = copy(users)
         random.shuffle(giftees)
 
-        if len(self.users) == 0:
+        if len(users) == 0:
             return None
 
-        if self.users[-1].id == giftees[0].id:
-            return self.matchmake()
+        if users[-1] == giftees[0]:
+            return self.matchmake(users)
 
-        for gifter in self.users:
+        for gifter in users:
             # treat recipients as a stack: if the user is shuffled as the recipient, grab the next (i.e. pop(-2))
-            if gifter.id == giftees[-1].id:
+            if gifter == giftees[-1]:
                 giftee = giftees.pop(-2)
             else:
                 giftee = giftees.pop()
 
-            pair = Pair.query.filter_by(event_id=self.id, gifter_id=gifter.id).first()
+            pair = Pair.query.filter_by(event_id=self.id, gifter_id=gifter).first()
             if pair is not None:
-                pair.giftee_id = giftee.id
+                pair.giftee_id = giftee
             else:
-                pair = Pair(event_id=self.id, gifter_id=gifter.id, giftee_id=giftee.id)
+                pair = Pair(event_id=self.id, gifter_id=gifter, giftee_id=giftee)
 
             db.session.add(pair)
             db.session.commit()

@@ -12,9 +12,47 @@ event
         {% if not event.users %}
         <p>This event has no users... yet!</p>
         {% else %}
-        <form action="/admin/events/{{ event.id }}/matchmake" method="post">
-            <button class="btn btn-primary" type="submit">Shuffle gifters</button>
-        </form>
+        {% if not event.pairs %}
+        <p>This event has not been shuffled!</p>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shuffleModal">
+            Shuffle gifters
+        </button>
+        {% else %}
+        <p>This event has been shuffled. Reshuffle at your own risk.</p>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#shuffleModal">
+            Shuffle gifters
+        </button>
+        {% endif %}
+        <div class="modal fade" id="shuffleModal" tabindex="-1" role="dialog" aria-labelledby="shuffleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="shuffleModalLabel">Shuffle users</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="/admin/events/{{ event.id }}/matchmake" method="post">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="shuffledUsers">Select users to shuffle</label>
+                            </div>
+                            <div class="form-group">
+                                <select multiple class="form-control form-control-lg" id="shuffledUsers" name="shuffledUsers">
+                                    {% for user in event.users %}
+                                        <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Shuffle users</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>
