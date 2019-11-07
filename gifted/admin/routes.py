@@ -6,7 +6,7 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import db, mail
-from gifted.models import Invite, Event, User
+from gifted.models import Invite, Event, User, generate_code
 
 admin = Blueprint('admin', __name__,
                   template_folder='templates',
@@ -99,7 +99,8 @@ def delete_user(user_id):
 def invite():
     email = request.form.get('email')
     event_id = request.form.get('eventId')
-    invitation = Invite(email=email, event_id=event_id)
+    code = generate_code()
+    invitation = Invite(email=email, event_id=event_id, code=code)
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email}!', 'success')
