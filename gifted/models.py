@@ -58,7 +58,7 @@ class Invite(db.Model):
     is_valid = db.Column(db.Integer, default=1)
     created_on = db.Column(db.DateTime(), default=datetime.now())
     expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
-    code = db.Column(db.String(80), nullable=False, default=generate_code())
+    code = db.Column(db.String(80), nullable=False)
     is_used = db.Column(db.Integer, default=0)
 
     def __repr__(self):
