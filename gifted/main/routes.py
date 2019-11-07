@@ -64,7 +64,7 @@ def register():
             return redirect(url_for('main.register'))
 
         invitation = Invite.query.filter_by(email=username, code=code).first()
-        event = Event.query.filter_by(id=invitation.id).first()
+        event = Event.query.filter_by(id=invitation.event_id).first()
         if invitation is None:
             flash('This code and email combination is invalid!', 'error')
             return redirect(url_for('main.register'))
