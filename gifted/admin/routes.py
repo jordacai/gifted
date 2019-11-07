@@ -106,7 +106,7 @@ def invite():
 
     message = Message('You have been invited to participate in a Gifted exchange!',
                       sender=current_app.config.get("MAIL_USERNAME"),
-                      recipients=[current_app.config.get("MAIL_USERNAME")])
+                      recipients=[email])
 
     message.html = render_template('email.html', email=invitation.email, code=invitation.code)
     mail.send(message)
