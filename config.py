@@ -8,6 +8,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'gifted.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    LOG_TO_STDOUT = os.environ.get('FLASK_LOG_TO_STDOUT')
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
     MAIL_USERNAME = os.environ['FLASK_MAIL_USER']

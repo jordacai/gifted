@@ -121,7 +121,7 @@ class Item(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     description = db.Column(db.String(240), nullable=False)
-    price = db.Column(db.String(10), nullable=False)
+    price = db.Column(db.Numeric(5, 2), nullable=False)
     location = db.Column(db.String(1024), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.Integer, default=3)
