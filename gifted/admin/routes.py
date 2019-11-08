@@ -47,11 +47,13 @@ def get_event(event_id):
 @admin.route('/admin/events/<event_id>/matchmake', methods=['POST'])
 def matchmake(event_id):
     users_to_shuffle = request.form.getlist('shuffledUsers')
+    if users_to_shuffle == 0 or users_to_shuffle == 1:
+        flash('A minimum of two are required to shuffle!', 'error')
+        return redirect(url_for('admin.get_event', event_id=event_id))
     event = Event.query.get(event_id)
-    print(event.pairs)
     event.matchmake(users_to_shuffle)
     flash('Shuffled users!', 'success')
-    return render_template('admin_event.html', event=event)
+    return redirect(url_for('admin.get_event', event_id=event_id))
 
 
 @admin.route('/admin/events/<event_id>/delete', methods=['POST'])

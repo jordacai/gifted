@@ -5,39 +5,83 @@ admin
 {% endblock %}
 
 {% block main %}
-<h4>Events</h4>
-{% if not events %}
-    <p>No active events</p>
-{% else %}
-    <table class="table">
-        <thead class="thead-light">
-            <tr>
-                <th scope="col">title</th>
-                <th scope="col">starts on</th>
-                <th scope="col">ends on</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for event in events %}
-            <tr>
-                <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
-                <td>{{ event.starts_on }}</td>
-                <td>{{ event.ends_on }}</td>
-                <td>
-                    <form action="/admin/events/{{ event.id }}/delete" method="post">
-                        <button class="btn btn-danger btn-sm" type="submit">delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
+<div class="container">
+    <h4>Events</h4>
+    {% if not events %}
+        <p>No active events</p>
+    {% else %}
+        <div class="table-responsive">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">title</th>
+                    <th scope="col">starts on</th>
+                    <th scope="col">ends on</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
+                    <td>{{ event.starts_on }}</td>
+                    <td>{{ event.ends_on }}</td>
+                    <td>
+                        <form action="/admin/events/{{ event.id }}/delete" method="post">
+                            <button class="btn btn-danger btn-sm" type="submit">delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% endif %}
+    <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#eventModal">
+      Create an event
+    </button>
+</div>
 
-<button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#eventModal">
-  Create an event
-</button>
+<div class="container">
+    <h4>Invites</h4>
+    {% if not invites %}
+        <p>No invites pending</p>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">email</th>
+                    <th scope="col">expired</th>
+                    <th scope="col">code</th>
+                    <th scope="col">used</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invite in invites %}
+                <tr>
+                    <td>{{ invite.email }}</td>
+                    <td>{{ invite.expires_on | is_expired }}</td>
+                    <td>{{ invite.code }}</td>
+                    <td>{{ invite.is_used | pretty_boolean }}</td>
+                    <td>
+                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
+                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
+      Invite someone
+    </button>
+</div>
+
+<!-- modals -->
 <div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -74,42 +118,6 @@ admin
         </div>
     </div>
 </div>
-
-<h4>Invites</h4>
-{% if not invites %}
-    <p>No invites pending</p>
-{% else %}
-    <table class="table">
-        <thead class="thead-light">
-            <tr>
-                <th scope="col">email</th>
-                <th scope="col">expired</th>
-                <th scope="col">code</th>
-                <th scope="col">used</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for invite in invites %}
-            <tr>
-                <td>{{ invite.email }}</td>
-                <td>{{ invite.expires_on | is_expired }}</td>
-                <td>{{ invite.code }}</td>
-                <td>{{ invite.is_used | pretty_boolean }}</td>
-                <td>
-                    <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
-                        <button class="btn btn-danger btn-sm" type="submit">revoke</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
-
-<button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
-  Invite someone
-</button>
 <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

@@ -5,6 +5,7 @@ login
 {% endblock %}
 
 {% block main %}
+<div class="container">
     <form action="/login" method="post">
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="username" placeholder="username" type="email">
@@ -14,4 +15,5 @@ login
         </div>
         <button class="btn btn-primary" type="submit">log in</button>
     </form>
+</div>
 {% endblock %}

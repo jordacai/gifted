@@ -6,8 +6,9 @@ home
 
 {% block main %}
     {% for event in events %}
+    <div class="container">
         <div class="card-deck">
-            <div class="card mb-3 w-25">
+            <div class="card mb-3" style="max-width: 540px;">
                 <img class="card-img-top" src="/static/xmas-wrapping-paper.jpg" alt="event image">
                 <div class="card-body">
                     <h5 class="card-title">{{ event.title }}</h5>
@@ -24,5 +25,6 @@ home
                 </div>
             </div>
         </div>
+    </div>
     {% endfor %}
 {% endblock %}

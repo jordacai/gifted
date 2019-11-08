@@ -93,7 +93,7 @@ class Event(db.Model):
         giftees = copy(users)
         random.shuffle(giftees)
 
-        if len(users) == 0:
+        if len(users) == 0 or len(users) == 1:
             return None
 
         if users[-1] == giftees[0]:
