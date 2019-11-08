@@ -17,15 +17,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
-csp = {
- 'default-src': [
-        '\'self\'',
-        '*.bootstrapcdn.com',
-        '*.jquery.com',
-        '*.cloudflare.com'
-    ]
-}
-Talisman(app, content_security_policy=csp)
+Talisman(app, content_security_policy=None)
 
 from gifted import models, errors
 from .admin.routes import admin
