@@ -5,93 +5,101 @@ event
 {% endblock %}
 
 {% block main %}
-<div class="card w-75 mb-3">
-    <div class="card-body">
-        <h5 class="card-title">{{ event.title }}</h5>
-        <p class="card-text">{{ event.description }}</p>
-        {% if not event.users %}
-        <p>This event has no users... yet!</p>
-        {% else %}
-        {% if not event.pairs %}
-        <p>This event has not been shuffled!</p>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shuffleModal">
-            Shuffle gifters
-        </button>
-        {% else %}
-        <p>This event has been shuffled. Reshuffle at your own risk.</p>
-        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#shuffleModal">
-            Shuffle gifters
-        </button>
-        {% endif %}
-        <div class="modal fade" id="shuffleModal" tabindex="-1" role="dialog" aria-labelledby="shuffleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="shuffleModalLabel">Shuffle users</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="/admin/events/{{ event.id }}/matchmake" method="post">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="shuffledUsers">Select users to shuffle</label>
-                            </div>
-                            <div class="form-group">
-                                <select multiple class="form-control form-control-lg" id="shuffledUsers" name="shuffledUsers">
-                                    {% for user in event.users %}
-                                        <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Shuffle users</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<div class="container">
+    <div class="card w-75 mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ event.title }}</h5>
+            <p class="card-text">{{ event.description }}</p>
+            {% if not event.users %}
+            <p>This event has no users... yet!</p>
+            {% else %}
+                {% if not event.pairs %}
+                <p>This event has not been shuffled!</p>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shuffleModal">
+                    Shuffle gifters
+                </button>
+                {% else %}
+                <p>This event has been shuffled. Reshuffle at your own risk.</p>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#shuffleModal">
+                    Shuffle gifters
+                </button>
+                {% endif %}
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
 {% if event.users %}
-<h4>Users</h4>
-    <table class="table">
-        <thead class="thead-light">
-            <tr>
-                <th scope="col">id</th>
-                <th scope="col">username</th>
-                <th scope="col">name</th>
-                <th scope="col">registered on</th>
-                <th scope="col">admin?</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in event.users %}
-            <tr>
-                <th scope="row">{{ user.id }}</th>
-                <td>{{ user.username }}</td>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
-                <td>{{ user.registered_on }}</td>
-                <td>{{ user.is_admin | pretty_boolean }}</td>
-                {% if user.is_admin == 0 %}
-                    <td>
-                        <form action="/admin/users/{{ user.id }}/delete" method="post">
-                            <button class="btn btn-danger btn-sm" type="submit">delete</button>
-                        </form>
-                    </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container">
+    <h4>Users</h4>
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">username</th>
+                    <th scope="col">name</th>
+                    <th scope="col">registered on</th>
+                    <th scope="col">admin?</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in event.users %}
+                <tr>
+                    <th scope="row">{{ user.id }}</th>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user.registered_on }}</td>
+                    <td>{{ user.is_admin | pretty_boolean }}</td>
+                    {% if user.is_admin == 0 %}
+                        <td>
+                            <form action="/admin/users/{{ user.id }}/delete" method="post">
+                                <button class="btn btn-danger btn-sm" type="submit">delete</button>
+                            </form>
+                        </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
+      Add ad-hoc user
+    </button>
+</div>
 
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
-  Add ad-hoc user
-</button>
+<!-- modals -->
+<div class="modal fade" id="shuffleModal" tabindex="-1" role="dialog" aria-labelledby="shuffleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shuffleModalLabel">Shuffle users</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/events/{{ event.id }}/matchmake" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="shuffledUsers">Select users to shuffle</label>
+                    </div>
+                    <div class="form-group">
+                        <select multiple class="form-control form-control-lg" id="shuffledUsers" name="shuffledUsers">
+                            {% for user in event.users %}
+                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Shuffle users</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -127,5 +135,4 @@ event
         </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}
