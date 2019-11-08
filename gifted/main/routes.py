@@ -104,17 +104,19 @@ def get_event(event_id):
         user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased'))\
             .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
         if user_purchased_result is None:
-            progress[user_id] = {'purchased': 0, 'total': row[1], 'percent': 0}
+            progress[user_id] = {'purchased': '0', 'total': str(total), 'percent': '0'}
         else:
             purchased = user_purchased_result[0]
             percent = purchased / total * 100
-            progress[user_id] = {'purchased': purchased, 'total': total, 'percent': percent}
+            progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
 
     user = User.query.get(session['user_id'])
-    total = 0
+    hook = 0
     for transaction in user.transactions:
-        total = total + transaction.item.price
-    return render_template('event.html', event=event, progress=progress, logged_in_user=user, hook="{:.2f}".format(total))
+        hook = hook + transaction.item.price
+    print(progress)
+    print(hook)
+    return render_template('event.html', event=event, progress=progress, logged_in_user=user, hook="{:.2f}".format(hook))
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
