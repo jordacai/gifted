@@ -114,8 +114,6 @@ def get_event(event_id):
     hook = 0
     for transaction in user.transactions:
         hook = hook + transaction.item.price
-    print(progress)
-    print(hook)
     return render_template('event.html', event=event, progress=progress, logged_in_user=user, hook="{:.2f}".format(hook))
 
 
@@ -134,10 +132,11 @@ def wishlist(event_id, user_id):
         db.session.commit()
         return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
+    event = Event.query.get(event_id)
     user = User.query.get(user_id)
-    items = Item.query.filter_by(event_id=event_id, user_id=user_id)
+    items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
     me = User.query.get(session['user_id'])
-    return render_template('wishlist.html', user=user, wishlist=items, me=me)
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, me=me)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
@@ -202,8 +201,3 @@ def is_expired(expires_on):
 def is_active(starts_on, ends_on):
     now = datetime.now()
     return True if starts_on < now < ends_on else False
-
-
-def get_giftee(event_id, gifter_id):
-    pair = Pair.query.filter_by(event_id=event_id, gifter_id=gifter_id).first()
-    return pair.giftee_id

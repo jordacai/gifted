@@ -18,6 +18,9 @@
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
             <a class="navbar-brand" href="/"><span class="blue">🎁 gifted</span></a>
             <div class="collapse navbar-collapse" id="navbar">
+                <div class="navbar-nav">
+                    {% block top_nav%}{% endblock %}
+                </div>
                 {% if session.username %}
                     <ul class="navbar-nav ml-auto mt-2">
                         {% if session.is_admin %}
@@ -56,6 +59,7 @@
 
         <main class="container p-5">
             {% block main %}{% endblock %}
+            {% block bot_nav %}{% endblock %}
         </main>
     </body>
 </html>

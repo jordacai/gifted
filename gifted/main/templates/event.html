@@ -4,6 +4,12 @@
 event
 {% endblock %}
 
+{% block top_nav %}
+<a class="nav-item nav-link" href="/">events</a>
+<span class="navbar-text">/</span>
+<a class="nav-item nav-link active" href="#">{{ event.title }}</a>
+{% endblock %}
+
 {% block main %}
 <div class="container">
     <div class="row">
@@ -62,5 +68,10 @@ event
             {% endif %}
         {% endif %}
     {% endfor %}
+</div>
+{% endblock %}
+{% block bot_nav %}
+<div class="container">
+    <a href="/"><span>back to events</span></a>
 </div>
 {% endblock %}
