@@ -4,68 +4,80 @@
 wishlist
 {% endblock %}
 
+{% block top_nav %}
+<a class="nav-item nav-link" href="/">events</a>
+<span class="navbar-text">/</span>
+<a class="nav-item nav-link" href="/events/{{ event.id }}">{{ event.title }}</a>
+<span class="navbar-text">/</span>
+<a class="nav-item nav-link active" href="#">{{ user.first_name }}'s wishlist</a>
+{% endblock %}
+
 {% block main %}
 <div class="container">
     <h5>{{ user.first_name }}'s Wishlist</h5>
-    <div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">status</th>
-                <th scope="col">description</th>
-                <th scope="col">location</th>
-                <th scope="col">price</th>
-                <th scope="col">quantity</th>
-                <th scope="col">priority</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for item in wishlist %}
-            {% if item.user_id == me.id %}
-            <tr>
-                <td>
-                    <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
-                        <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
-                    </form>
-                </td>
-            {% elif item.is_purchased %}
-            <tr class="table-success">
-                {% if item.transaction in me.transactions %}
-                <td>
-                    <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
-                        <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit">Unclaim</button>
-                    </form>
-                </td>
-                {% else %}
-                <td>
-                    <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
-                </td>
-                {% endif %}
-            {% else %}
-            <tr>
-                <td>
-                    <form action="{{ request.path }}/transactions" method="post">
-                        <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
-                        <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
-                        <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
-                        <button class="btn btn-primary btn-sm" type="submit">Claim!</button>
-                    </form>
-                </td>
-            {% endif %}
-                <td>{{ item.description }}</td>
-                <td><abbr title="{{ item.location }}"><a href="{{ item.location }}">{{ item.location }}</a></abbr></td>
-                <td>{{ item.price }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.priority }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% if wishlist|length == 0 %}
+    <div>
+        <p>This wishlist has not been started...yet!</p>
     </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">description</th>
+                        <th scope="col">location</th>
+                        <th scope="col">price</th>
+                        <th scope="col">priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in wishlist %}
+                    {% if item.user_id == me.id %}
+                    <tr>
+                        <td>
+                            <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
+                                <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
+                                <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                            </form>
+                        </td>
+                    {% elif item.is_purchased %}
+                    <tr class="table-success">
+                        {% if item.transaction in me.transactions %}
+                        <td>
+                            <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
+                                <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
+                                <button class="btn btn-danger btn-sm" type="submit">Unclaim</button>
+                            </form>
+                        </td>
+                        {% else %}
+                        <td>
+                            <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
+                        </td>
+                        {% endif %}
+                    {% else %}
+                    <tr>
+                        <td>
+                            <form action="{{ request.path }}/transactions" method="post">
+                                <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
+                                <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
+                                <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
+                                <button class="btn btn-primary btn-sm" type="submit">Claim!</button>
+                            </form>
+                        </td>
+                    {% endif %}
+                        <td>{{ item.description }}</td>
+                        <td><abbr title="{{ item.location }}"><a href="{{ item.location }}">{{ item.location }}</a></abbr></td>
+                        <td>{{ "${:,.2f}".format(item.price) }}</td>
+                        <td>{{ item.priority }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
     {% if user.id == me.id %}
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#wishlistModal">
+    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
       Add to wishlist
     </button>
     {% endif %}
@@ -110,14 +122,6 @@ wishlist
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="hash">#</span>
-                            </div>
-                            <input name="quantity" type="number" class="form-control" placeholder="quantity" aria-label="quantity" aria-describedby="hash">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group col-sm">
-                            <div class="input-group-prepend">
                                 <span class="input-group-text">!</span>
                             </div>
                             <input name="priority" type="number" class="form-control" placeholder="priority">
@@ -131,5 +135,10 @@ wishlist
             </form>
         </div>
     </div>
+</div>
+{% endblock %}
+{% block bot_nav %}
+<div class="container">
+    <a href="/events/{{ event.id }}"><span>back to event</span></a>
 </div>
 {% endblock %}
