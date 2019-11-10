@@ -11,7 +11,7 @@ event
 {% endblock %}
 
 {% block main %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="card text-center w-75 mx-auto mb-4">
             <div class="card-body">
@@ -21,11 +21,11 @@ event
             </div>
             <div class="card-footer">
                 <h6>You are on the hook for ${{ liability }}</h6>
+                <a href="/events/{{ event.id }}/purchases/{{ session['user_id'] }}">Manage my purchases</a>
             </div>
         </div>
     </div>
-</div>
-<div class="container">
+
     {% for user in event.users %}
         {% if user.id != logged_in_user.id %}
             {% if user.id == logged_in_user.pair.giftee_id %}
