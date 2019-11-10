@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+purchases
+{% endblock %}
+
+{% block top_nav %}
+<a class="nav-item nav-link" href="/">events</a>
+<span class="navbar-text">/</span>
+<a class="nav-item nav-link" href="/events/{{ event.id }}">{{ event.title }}</a>
+<span class="navbar-text">/</span>
+<a class="nav-item nav-link active" href="#">My purchases</a>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h5>My Purchases</h5>
+    {% if purchases|length == 0 %}
+    <div>
+        <p>You have not made any purchases...yet!</p>
+    </div>
+    {% else %}
+    <div>
+        <p>You have made {{ purchases|length }} purchase(s).</p>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">item</th>
+                    <th scope="col">recipient</th>
+                    <th scope="col">price</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for purchase in purchases %}
+                <tr>
+                    <td>
+                        <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
+                            <input type="hidden" id="deleted_transaction_id" name="transaction_id" value="{{ purchase.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">Unclaim</button>
+                        </form>
+                    </td>
+                    <td><span data-toggle="tooltip" title="{{ purchase.item.description }}">{{ purchase.item.description }}</span></td>
+                    <td>{{ purchase.giftee.first_name }} {{ purchase.giftee.last_name }}</td>
+                    <td>{{ "${:,.2f}".format(purchase.item.price) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3"></th>
+                    <td>{{ "${:,.2f}".format(total) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block bot_nav %}
+<div class="container">
+    <a href="/events/{{ event.id }}"><span>back to event</span></a>
+</div>
+{% endblock %}

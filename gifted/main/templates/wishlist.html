@@ -33,7 +33,7 @@ wishlist
                 </thead>
                 <tbody>
                 {% for item in wishlist %}
-                    {% if item.user_id == me.id %}
+                    {% if item.user_id == session['user_id'] %}
                     <tr>
                         <td>
                             <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
@@ -43,11 +43,11 @@ wishlist
                         </td>
                     {% elif item.is_purchased %}
                     <tr class="table-success">
-                        {% if item.transaction in me.transactions %}
+                        {% if item.transaction in my_transactions %}
                         <td>
                             <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
                                 <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
-                                <button class="btn btn-danger btn-sm" type="submit">Unclaim</button>
+                                <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">Unclaim</button>
                             </form>
                         </td>
                         {% else %}
@@ -90,7 +90,7 @@ wishlist
             </table>
         </div>
     {% endif %}
-    {% if user.id == me.id %}
+    {% if user.id == session['user_id'] %}
     <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
         Add to wishlist
     </button>

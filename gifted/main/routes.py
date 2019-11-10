@@ -111,8 +111,9 @@ def event(event_id):
             progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
 
     user = User.query.get(session['user_id'])
+    transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user.id).all()
     liability = 0
-    for transaction in user.transactions:
+    for transaction in transactions:
         liability = liability + transaction.item.price
     return render_template('event.html', event=event, progress=progress, logged_in_user=user,
                            liability="{:.2f}".format(liability))
@@ -126,12 +127,12 @@ def wishlist(event_id, user_id):
         price = request.form.get('price')
         quantity = request.form.get('quantity')
         priority = request.form.get('priority')
-        print(priority)
 
         item = Item(description=description, location=location, price=price, quantity=quantity, priority=priority,
                     event_id=event_id, user_id=user_id)
         db.session.add(item)
         db.session.commit()
+
         return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
     event = Event.query.get(event_id)
@@ -140,7 +141,19 @@ def wishlist(event_id, user_id):
     total = Item.query.with_entities(func.sum(Item.price).label('total')) \
         .filter_by(event_id=event_id, user_id=user_id).scalar()
     me = User.query.get(session['user_id'])
-    return render_template('wishlist.html', event=event, user=user, wishlist=items, total=total, me=me)
+    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=me.id).all()
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, total=total,
+                           my_transactions=my_transactions)
+
+
+@main.route('/events/<event_id>/purchases/<user_id>')
+def purchases(event_id, user_id):
+    event = Event.query.get(event_id)
+    transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user_id).all()
+    total = 0
+    for transaction in transactions:
+        total = total + transaction.item.price
+    return render_template('purchases.html', event=event, purchases=transactions, total=total)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
