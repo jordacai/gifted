@@ -30,7 +30,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user is None:
-            flash('Username does not exist!', 'error')
+            flash('Username does not exist!', 'warning')
             return redirect(url_for('main.login'))
 
         # password is valid, proceed to set session cookie and redirect to index
@@ -42,7 +42,7 @@ def login():
             flash('Logged in successfully', 'success')
             return redirect(url_for('main.index'))
         else:
-            flash('Invalid password!', 'error')
+            flash('Invalid password!', 'warning')
             return redirect(url_for('main.login'))
 
     # it's a GET, render the template
@@ -60,21 +60,21 @@ def register():
         last_name = request.form.get('lastName')
 
         if password != password_confirm:
-            flash('Passwords must match!', 'error')
+            flash('Passwords must match!', 'warning')
             return redirect(url_for('main.register'))
 
         invitation = Invite.query.filter_by(email=username, code=code).first()
         event = Event.query.filter_by(id=invitation.event_id).first()
         if invitation is None:
-            flash('This code and email combination is invalid!', 'error')
+            flash('This code and email combination is invalid!', 'warning')
             return redirect(url_for('main.register'))
 
         if datetime.now() > invitation.expires_on:
-            flash('This invitation has expired!', 'error')
+            flash('This invitation has expired!', 'warning')
             return redirect(url_for('main.register'))
 
         if event is None or datetime.now() > event.ends_on:
-            flash('This event has either expired or it has been deleted!', 'error')
+            flash('This event has either expired or it has been deleted!', 'warning')
             return redirect(url_for('main.register'))
 
         user = User(username=username, password=security.generate_password_hash(password),
@@ -93,7 +93,7 @@ def register():
 
 
 @main.route('/events/<event_id>')
-def get_event(event_id):
+def event(event_id):
     event = Event.query.get(event_id)
     user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
         .filter_by(event_id=event_id).group_by(Item.user_id).all()
@@ -111,10 +111,11 @@ def get_event(event_id):
             progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
 
     user = User.query.get(session['user_id'])
-    hook = 0
+    liability = 0
     for transaction in user.transactions:
-        hook = hook + transaction.item.price
-    return render_template('event.html', event=event, progress=progress, logged_in_user=user, hook="{:.2f}".format(hook))
+        liability = liability + transaction.item.price
+    return render_template('event.html', event=event, progress=progress, logged_in_user=user,
+                           liability="{:.2f}".format(liability))
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
@@ -125,6 +126,7 @@ def wishlist(event_id, user_id):
         price = request.form.get('price')
         quantity = request.form.get('quantity')
         priority = request.form.get('priority')
+        print(priority)
 
         item = Item(description=description, location=location, price=price, quantity=quantity, priority=priority,
                     event_id=event_id, user_id=user_id)
@@ -135,8 +137,10 @@ def wishlist(event_id, user_id):
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
+    total = Item.query.with_entities(func.sum(Item.price).label('total')) \
+        .filter_by(event_id=event_id, user_id=user_id).scalar()
     me = User.query.get(session['user_id'])
-    return render_template('wishlist.html', event=event, user=user, wishlist=items, me=me)
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, total=total, me=me)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
@@ -145,7 +149,7 @@ def remove_item(event_id, user_id, item_id):
     item = Item.query.get(item_id)
     db.session.delete(item)
     db.session.commit()
-    flash('You deleted an item!', 'error')
+    flash('You deleted an item!', 'warning')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
 
@@ -173,7 +177,7 @@ def unclaim_item(event_id, user_id, transaction_id):
     db.session.delete(transaction)
     item.is_purchased = 0
     db.session.commit()
-    flash('You unclaimed an item!', 'error')
+    flash('You unclaimed an item!', 'warning')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
 

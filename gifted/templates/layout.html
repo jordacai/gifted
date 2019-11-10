@@ -37,7 +37,7 @@
             </div>
         </nav>
 
-    <!-- conditionally flash errors and successes in separate groups -->
+    <!-- conditionally flash warnings and successes in separate groups -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <header>
@@ -47,7 +47,7 @@
                         {{ message }} <br/>
                     </div>
                 {% endif %}
-                {% if category == 'error' %}
+                {% if category == 'warning' %}
                     <div class="alert alert-danger border text-center" role="alert">
                         {{ message }} <br/>
                     </div>
@@ -56,7 +56,6 @@
         </header>
         {% endif %}
     {% endwith %}
-
         <main class="container p-5">
             {% block main %}{% endblock %}
             {% block bot_nav %}{% endblock %}

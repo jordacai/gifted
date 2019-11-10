@@ -124,7 +124,7 @@ class Item(db.Model):
     price = db.Column(db.Numeric(5, 2), nullable=False)
     location = db.Column(db.String(1024), nullable=False)
     quantity = db.Column(db.Integer, default=1)
-    priority = db.Column(db.Integer, default=3)
+    priority = db.Column(db.String(40), default='medium')
     is_purchased = db.Column(db.Integer, default=0)
     transaction = db.relationship('Transaction', uselist=False, backref='item', cascade='all,delete')
 
