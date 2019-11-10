@@ -18,13 +18,13 @@ def login_required(f):
 # todo: test redirection and ensure flow is broken on invalid input
 def validate(username, password, password_confirm=None, redirect_to='main.login'):
     if not username:
-        flash('Username is required!', 'error')
+        flash('Username is required!', 'warning')
         return redirect(url_for(redirect_to))
     if not password:
-        flash('Password is required!', 'error')
+        flash('Password is required!', 'warning')
         return redirect(url_for(redirect_to))
     if password_confirm is not None and password != password_confirm:
-        flash('Passwords must match!', 'error')
+        flash('Passwords must match!', 'warning')
         return redirect(url_for(redirect_to))
 
 

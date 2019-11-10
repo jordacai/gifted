@@ -48,7 +48,7 @@ def get_event(event_id):
 def matchmake(event_id):
     users_to_shuffle = request.form.getlist('shuffledUsers')
     if users_to_shuffle == 0 or users_to_shuffle == 1:
-        flash('A minimum of two are required to shuffle!', 'error')
+        flash('A minimum of two are required to shuffle!', 'warning')
         return redirect(url_for('admin.get_event', event_id=event_id))
     event = Event.query.get(event_id)
     event.matchmake(users_to_shuffle)
@@ -74,7 +74,7 @@ def create_user(event_id):
     last_name = request.form.get('lastName')
 
     if password != password_confirm:
-        flash('Passwords must match!', 'error')
+        flash('Passwords must match!', 'warning')
         return redirect(url_for('admin.get_event', event_id=event_id))
 
     user = User(username=username, password=security.generate_password_hash(password),
