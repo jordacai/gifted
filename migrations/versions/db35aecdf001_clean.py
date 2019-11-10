@@ -64,7 +64,7 @@ def upgrade():
     sa.Column('price', sa.Numeric(precision=5, scale=2), nullable=False),
     sa.Column('location', sa.String(length=1024), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=True),
-    sa.Column('priority', sa.Integer(), nullable=True),
+    sa.Column('priority', sa.String(length=20), nullable=True),
     sa.Column('is_purchased', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
