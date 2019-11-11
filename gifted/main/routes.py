@@ -26,7 +26,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        validate(username=username, password=password, redirect_to='views.login')
+        validate(username=username, password=password, redirect_to='main.login')
         user = User.query.filter_by(username=username).first()
 
         if user is None:
