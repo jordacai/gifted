@@ -17,15 +17,17 @@ home
                 <div class="card-body">
                     <h5 class="card-title">{{ event.title }}</h5>
                     <p class="card-text">{{ event.description }}</p>
-                    {% if event.is_active %}
+                    {% if event.is_active() %}
                         <h6>Event is active!</h6>
-                    {% elif event.is_expired %}
-                        <p>This event ended on {{ event.ends_on }}</p>
                     {% endif %}
                     <a href="/events/{{ event.id }}" class="btn btn-primary">Go to event</a>
                 </div>
                 <div class="card-footer text-muted">
-                    Event ends on {{ event.ends_on }}
+                    {% if event.is_expired() %}
+                        Event ended on {{ event.ends_on }}
+                    {% else %}
+                        Event ends on {{ event.ends_on }}
+                    {% endif %}
                 </div>
             </div>
         </div>
