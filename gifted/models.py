@@ -80,7 +80,7 @@ class Event(db.Model):
     pairs = db.relationship('Pair', backref='event', lazy=True)
 
     def __repr__(self):
-        return '<Event id=%r, title=%r>' % (self.id, self.title)
+        return '<Event id=%r, title=%r, starts_on=%r, ends_on=%r>' % (self.id, self.title, self.starts_on, self.ends_on)
 
     def is_active(self):
         now = datetime.now()
