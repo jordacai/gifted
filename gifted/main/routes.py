@@ -156,6 +156,16 @@ def purchases(event_id, user_id):
     return render_template('purchases.html', event=event, purchases=transactions, total=total)
 
 
+@main.route('/events/<event_id>/purchases/<user_id>/delete', methods=['POST'])
+def remove_purchase(event_id, user_id):
+    purchase_id = request.form.get('purchase_id')
+    purchase = Transaction.query.get(purchase_id)
+    db.session.delete(purchase)
+    db.session.commit()
+    flash('You deleted a purchase!', 'warning')
+    return redirect(url_for('main.purchases', event_id=event_id, user_id=user_id))
+
+
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
 def remove_item(event_id, user_id, item_id):
     item_id = request.form.get('item_id')
@@ -205,7 +215,7 @@ def logout():
 # todo: move all this stuff
 @main.app_template_filter('pretty_boolean')
 def pretty_boolean(i):
-    return True if i is 1 else False
+    return True if i == 1 else False
 
 
 @main.app_template_filter('is_expired')

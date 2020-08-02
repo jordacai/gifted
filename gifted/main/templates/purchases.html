@@ -38,7 +38,7 @@ purchases
                 <tr>
                     <td>
                         <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
-                            <input type="hidden" id="deleted_transaction_id" name="transaction_id" value="{{ purchase.id }}">
+                            <input type="hidden" id="purchase_id" name="purchase_id" value="{{ purchase.id }}">
                             <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">Unclaim</button>
                         </form>
                     </td>
