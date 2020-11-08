@@ -6,7 +6,7 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db
-from gifted.models import User, Invite, Event, Item, Transaction, Pair
+from gifted.models import User, Invite, Event, Item, Transaction
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -95,26 +95,13 @@ def register():
 @main.route('/events/<event_id>')
 def event(event_id):
     event = Event.query.get(event_id)
-    user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
-        .filter_by(event_id=event_id).group_by(Item.user_id).all()
-    progress = {}
-    for row in user_total_result:
-        user_id = row[0]
-        total = row[1]
-        user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased'))\
-            .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
-        if user_purchased_result is None:
-            progress[user_id] = {'purchased': '0', 'total': str(total), 'percent': '0'}
-        else:
-            purchased = user_purchased_result[0]
-            percent = purchased / total * 100
-            progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
-
     user = User.query.get(session['user_id'])
     transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user.id).all()
     liability = 0
     for transaction in transactions:
         liability = liability + transaction.item.price
+
+    progress = get_event_progress(event_id)
     return render_template('event.html', event=event, progress=progress, logged_in_user=user,
                            liability="{:.2f}".format(liability))
 
@@ -138,11 +125,9 @@ def wishlist(event_id, user_id):
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
-    total = Item.query.with_entities(func.sum(Item.price).label('total')) \
-        .filter_by(event_id=event_id, user_id=user_id).scalar()
-    me = User.query.get(session['user_id'])
-    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=me.id).all()
-    return render_template('wishlist.html', event=event, user=user, wishlist=items, total=total,
+    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=session['user_id']).all()
+    progress = get_wishlist_progress(event_id, user_id)
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress,
                            my_transactions=my_transactions)
 
 
@@ -212,7 +197,6 @@ def logout():
     return redirect(url_for('main.login'))
 
 
-# todo: move all this stuff
 @main.app_template_filter('pretty_boolean')
 def pretty_boolean(i):
     return True if i == 1 else False
@@ -228,3 +212,39 @@ def is_expired(expires_on):
 def is_active(starts_on, ends_on):
     now = datetime.now()
     return True if starts_on < now < ends_on else False
+
+
+def get_event_progress(event_id):
+    progress = {}
+    user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
+        .filter_by(event_id=event_id).group_by(Item.user_id).all()
+    for row in user_total_result:
+        user_id = row[0]
+        total = row[1]
+        user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased')) \
+            .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
+        if user_purchased_result is None:
+            progress[user_id] = {'purchased': '0', 'total': str(total), 'percent': '0'}
+        else:
+            purchased = user_purchased_result[0]
+            percent = purchased / total * 100
+            progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
+    return progress
+
+
+def get_wishlist_progress(event_id, user_id):
+    user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
+        .filter_by(event_id=event_id, user_id=user_id).group_by(Item.user_id).first()
+    user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased')) \
+        .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
+    if user_total_result is None:
+        total = 0
+    else:
+        total = user_total_result.total
+    if user_purchased_result is None:
+        progress = {'purchased': '0', 'total': str(total), 'percent': '0'}
+    else:
+        purchased = user_purchased_result[0]
+        percent = purchased / total * 100
+        progress = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
+    return progress
