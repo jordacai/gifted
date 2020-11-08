@@ -1,12 +1,13 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, url_for, session
+from flask import Blueprint, render_template, request, flash, url_for, session, current_app
+from flask_mail import Message
 from sqlalchemy import func
 from werkzeug import security
 from werkzeug.utils import redirect
 
-from gifted import login_required, validate, db
-from gifted.models import User, Invite, Event, Item, Transaction
+from gifted import login_required, validate, db, mail
+from gifted.models import User, Invite, Event, Item, Transaction, generate_code
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -195,6 +196,23 @@ def logout():
     session.pop('username', None)
     session.pop('is_admin', None)
     return redirect(url_for('main.login'))
+
+
+@main.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        code = generate_code()
+        message = Message('Gifted password reset',
+                          sender=current_app.config.get("MAIL_USERNAME"),
+                          recipients=[email])
+
+        message.html = render_template('forgot_password_email.html', email=email, code=code)
+        mail.send(message)
+        flash('A password reset email was sent to {}!'.format(email), 'success')
+        return redirect(url_for('main.login'))
+
+    return render_template('forgot.html')
 
 
 @main.app_template_filter('pretty_boolean')
