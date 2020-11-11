@@ -15,37 +15,39 @@ wishlist
 {% block main %}
 <div class="container">
     <div class="jumbotron">
+        <!-- This is for the currently logged in user, do not render progress! -->
         {% if user.id == session['user_id'] %}
-        <h2>My Wishlist</h2>
-        <p class="lead">Your wishlist total is ${{ progress.total }}</p>
-        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
-            Add to wishlist
-        </button>
+            <h2>My Wishlist</h2>
+            <p class="lead">Your wishlist total is ${{ progress.total }}</p>
+            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
+                Add to wishlist
+            </button>
+        <!-- This is for every other user, show progress with friendly messages! -->
         {% else %}
-        <h2>{{ user.first_name }}'s Wishlist</h2>
-        {% if wishlist|length == 0 %}
-        <div>
-            <p>This wishlist has not been started...yet!</p>
-        </div>
-        {% else %}
-            {% if progress.percent == '0' %}
+            <h2>{{ user.first_name }}'s Wishlist</h2>
+            {% if wishlist|length == 0 %}
             <p class="lead">
-                Get this thing started, people! 🙄
-            </p>
-            {% elif progress.percent == '100' %}
-            <p class="lead">
-                We did it! {{ user.first_name }}'s wishlist is complete! 🥳
+                This wishlist has not been started...yet!
             </p>
             {% else %}
-            <p class="lead">
-                Gifters have claimed <strong>${{ progress.purchased }}</strong> <br>
-                of the <strong>${{ progress.total }}</strong> worth of stuff {{ user.first_name }} requested.
-            </p>
+                {% if progress.percent == '0.00' %}
+                <p class="lead">
+                    Get this thing started, people! 🙄
+                </p>
+                {% elif progress.percent == '100.00' %}
+                <p class="lead">
+                    We did it! {{ user.first_name }}'s wishlist is complete! 🥳
+                </p>
+                {% else %}
+                <p class="lead">
+                    Gifters have claimed <strong>${{ progress.purchased }}</strong> <br>
+                    of the <strong>${{ progress.total }}</strong> worth of stuff {{ user.first_name }} requested.
+                </p>
+                <div class="progress bg-white mb-5">
+                    <div class="progress-bar progress-bar-striped bg-success" style="width: {{ progress.percent }}%;"></div>
+                </div>
+                {% endif %}
             {% endif %}
-        <div class="progress bg-white mb-5">
-            <div class="progress-bar progress-bar-striped bg-success" style="width: {{ progress.percent }}%;"></div>
-        </div>
-        {% endif %}
         {% endif %}
 
         <div class="card-columns">
@@ -66,18 +68,18 @@ wishlist
                             Remove
                         </button>
                     </form>
-                    {% elif item.is_purchased %}
-                    {% if item.transaction in my_transactions %}
-                    <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
-                        <input type="hidden" id="transaction_id" name="transaction_id"
-                               value="{{ item.transaction.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
-                            Unclaim
-                        </button>
-                    </form>
-                    {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
-                    {% endif %}
+                    {% elif item.transaction is not none %}
+                        {% if item.transaction.gifter_id == session['user_id'] %}
+                        <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
+                            <input type="hidden" id="transaction_id" name="transaction_id"
+                                   value="{{ item.transaction.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                                Unclaim
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
+                        {% endif %}
                     {% else %}
                     <form action="{{ request.path }}/transactions" method="post">
                         <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
