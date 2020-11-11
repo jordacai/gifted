@@ -3,6 +3,8 @@ import string
 from copy import copy
 from datetime import datetime, timedelta
 
+from sqlalchemy import func
+
 from gifted import db
 
 event_user = db.Table('event_user',
@@ -50,6 +52,26 @@ class Transaction(db.Model):
     def __repr__(self):
         return '<Transaction id=%r, event_id=%r, item_id=%r, gifter_id=%r, giftee_id=%r>' % \
                (self.id, self.event_id, self.item_id, self.gifter_id, self.giftee_id)
+
+    @classmethod
+    def get_user_liability(cls, event_id, user_id):
+        stmt = func.sum(Item.price).filter(Item.event_id == event_id, Item.id == Transaction.item_id,
+                                           Transaction.gifter_id == user_id)
+        total_result = db.session.query(stmt).first()
+        if total_result is not None and total_result[0] is not None:
+            return total_result[0]
+        else:
+            return 0
+
+    @classmethod
+    def get_user_total(cls, event_id, user_id):
+        stmt = func.sum(Item.price).filter(Item.event_id == event_id, Item.id == Transaction.item_id,
+                                           Item.user_id == user_id)
+        total_result = db.session.query(stmt).first()
+        if total_result is not None and total_result[0] is not None:
+            return total_result[0]
+        else:
+            return 0
 
 
 class Invite(db.Model):
@@ -130,4 +152,19 @@ class Item(db.Model):
     transaction = db.relationship('Transaction', uselist=False, backref='item', cascade='all,delete')
 
     def __repr__(self):
-        return '<Item id=%r, description=%r, price=%r>' % (self.id, self.description, self.price)
+        return '<Item id=%r, description=%r, price=%r, transaction=%r>' % \
+               (self.id, self.description, self.price, self.transaction)
+
+    @classmethod
+    def get_wishlist_total(cls, event_id, user_id):
+        stmt = func.sum(Item.price).filter(Item.event_id == event_id, Item.user_id == user_id)
+        total_result = db.session.query(stmt).first()
+        if total_result is not None and total_result[0] is not None:
+            return total_result[0]
+        else:
+            return 0
+
+    @classmethod
+    def get_wishlist_totals(cls, event_id):
+        return Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')).filter_by(
+            event_id=event_id).group_by(Item.user_id).all()
