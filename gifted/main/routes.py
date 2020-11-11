@@ -1,12 +1,13 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, url_for, session
+from flask import Blueprint, render_template, request, flash, url_for, session, current_app
+from flask_mail import Message
 from sqlalchemy import func
 from werkzeug import security
 from werkzeug.utils import redirect
 
-from gifted import login_required, validate, db
-from gifted.models import User, Invite, Event, Item, Transaction, Pair
+from gifted import login_required, validate, db, mail
+from gifted.models import User, Invite, Event, Item, Transaction, generate_code
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -95,26 +96,9 @@ def register():
 @main.route('/events/<event_id>')
 def event(event_id):
     event = Event.query.get(event_id)
-    user_total_result = Item.query.with_entities(Item.user_id, func.sum(Item.price).label('total')) \
-        .filter_by(event_id=event_id).group_by(Item.user_id).all()
-    progress = {}
-    for row in user_total_result:
-        user_id = row[0]
-        total = row[1]
-        user_purchased_result = Item.query.with_entities(func.sum(Item.price).label('purchased'))\
-            .filter_by(event_id=event_id, user_id=user_id, is_purchased=1).group_by(Item.user_id).first()
-        if user_purchased_result is None:
-            progress[user_id] = {'purchased': '0', 'total': str(total), 'percent': '0'}
-        else:
-            purchased = user_purchased_result[0]
-            percent = purchased / total * 100
-            progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': str(percent)}
-
     user = User.query.get(session['user_id'])
-    transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user.id).all()
-    liability = 0
-    for transaction in transactions:
-        liability = liability + transaction.item.price
+    liability = Transaction.get_user_liability(event.id, user.id)
+    progress = get_event_progress(event_id)
     return render_template('event.html', event=event, progress=progress, logged_in_user=user,
                            liability="{:.2f}".format(liability))
 
@@ -138,12 +122,11 @@ def wishlist(event_id, user_id):
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
-    total = Item.query.with_entities(func.sum(Item.price).label('total')) \
-        .filter_by(event_id=event_id, user_id=user_id).scalar()
-    me = User.query.get(session['user_id'])
-    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=me.id).all()
-    return render_template('wishlist.html', event=event, user=user, wishlist=items, total=total,
-                           my_transactions=my_transactions)
+    transactions = Transaction.query.filter_by(event_id=event_id).all()
+    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=session['user_id']).all()
+    progress = get_wishlist_progress(event_id, user_id)
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress,
+                           transactions=transactions, my_transactions=my_transactions)
 
 
 @main.route('/events/<event_id>/purchases/<user_id>')
@@ -194,11 +177,15 @@ def claim_item(event_id, user_id):
 
 @main.route('/events/<event_id>/wishlists/<user_id>/transactions/<transaction_id>/delete', methods=['POST'])
 def unclaim_item(event_id, user_id, transaction_id):
-    transaction_id = request.form.get('transaction_id')
+    if transaction_id != request.form.get('transaction_id'):
+        flash('Transaction identifiers do not match.', 'warning')
+        return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
     transaction = Transaction.query.get(transaction_id)
     item = transaction.item
-    db.session.delete(transaction)
     item.is_purchased = 0
+    db.session.add(item)
+    db.session.commit()
+    db.session.delete(transaction)
     db.session.commit()
     flash('You unclaimed an item!', 'warning')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
@@ -212,7 +199,23 @@ def logout():
     return redirect(url_for('main.login'))
 
 
-# todo: move all this stuff
+@main.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        code = generate_code()
+        message = Message('Gifted password reset',
+                          sender=current_app.config.get("MAIL_USERNAME"),
+                          recipients=[email])
+
+        message.html = render_template('forgot_password_email.html', email=email, code=code)
+        mail.send(message)
+        flash('A password reset email was sent to {}!'.format(email), 'success')
+        return redirect(url_for('main.login'))
+
+    return render_template('forgot.html')
+
+
 @main.app_template_filter('pretty_boolean')
 def pretty_boolean(i):
     return True if i == 1 else False
@@ -228,3 +231,26 @@ def is_expired(expires_on):
 def is_active(starts_on, ends_on):
     now = datetime.now()
     return True if starts_on < now < ends_on else False
+
+
+def get_event_progress(event_id):
+    progress = {}
+    user_total_result = Item.get_wishlist_totals(event_id)
+    for row in user_total_result:
+        user_id = row[0]
+        total = row[1]
+        purchased = Transaction.get_user_total(event_id, user_id)
+        percent = purchased / total * 100 if total != 0 else 0
+        progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': "{:.2f}".format(percent)}
+
+    print(progress)
+    return progress
+
+
+def get_wishlist_progress(event_id, user_id):
+    total = Item.get_wishlist_total(event_id, user_id)
+    purchased = Transaction.get_user_total(event_id, user_id)
+    percent = purchased / total * 100 if total != 0 else 0
+    progress = {'purchased': str(purchased), 'total': str(total), 'percent': "{:.2f}".format(percent)}
+    print(progress)
+    return progress

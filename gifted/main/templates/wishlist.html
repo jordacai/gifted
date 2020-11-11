@@ -14,91 +14,91 @@ wishlist
 
 {% block main %}
 <div class="container">
-    <h5>{{ user.first_name }}'s Wishlist</h5>
-    {% if wishlist|length == 0 %}
-    <div>
-        <p>This wishlist has not been started...yet!</p>
-    </div>
-    {% else %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col"></th>
-                        <th scope="col">description</th>
-                        <th scope="col">location</th>
-                        <th scope="col">priority</th>
-                        <th scope="col">price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for item in wishlist %}
+    <div class="jumbotron">
+        <!-- This is for the currently logged in user, do not render progress! -->
+        {% if user.id == session['user_id'] %}
+            <h2>My Wishlist</h2>
+            <p class="lead">Your wishlist total is ${{ progress.total }}</p>
+            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
+                Add to wishlist
+            </button>
+        <!-- This is for every other user, show progress with friendly messages! -->
+        {% else %}
+            <h2>{{ user.first_name }}'s Wishlist</h2>
+            {% if wishlist|length == 0 %}
+            <p class="lead">
+                This wishlist has not been started...yet!
+            </p>
+            {% else %}
+                {% if progress.percent == '0.00' %}
+                <p class="lead">
+                    Get this thing started, people! 🙄
+                </p>
+                {% elif progress.percent == '100.00' %}
+                <p class="lead">
+                    We did it! {{ user.first_name }}'s wishlist is complete! 🥳
+                </p>
+                {% else %}
+                <p class="lead">
+                    Gifters have claimed <strong>${{ progress.purchased }}</strong> <br>
+                    of the <strong>${{ progress.total }}</strong> worth of stuff {{ user.first_name }} requested.
+                </p>
+                <div class="progress bg-white mb-5">
+                    <div class="progress-bar progress-bar-striped bg-success" style="width: {{ progress.percent }}%;"></div>
+                </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
+        <div class="card-columns">
+            {% for item in wishlist %}
+            <div class="card">
+                <div class="card-header">{{ item.description }}</div>
+                <div class="card-body">
+                    <h5 class="card-subtitle mb-2 text-muted">${{ item.price }}</h5>
+                    {% if item.location %}
+                    <p class="mb-2">
+                        <a class="card-link" href="{{ item.location }}">Find me here</a>
+                    </p>
+                    {% endif %}
                     {% if item.user_id == session['user_id'] %}
-                    <tr>
-                        <td>
-                            <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
-                                <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
-                                <button class="btn btn-danger btn-sm" type="submit">Remove</button>
-                            </form>
-                        </td>
-                    {% elif item.is_purchased %}
-                    <tr class="table-success">
-                        {% if item.transaction in my_transactions %}
-                        <td>
-                            <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
-                                <input type="hidden" id="transaction_id" name="transaction_id" value="{{ item.transaction.id }}">
-                                <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">Unclaim</button>
-                            </form>
-                        </td>
+                    <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
+                        <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
+                        <button class="btn btn-danger btn-sm" type="submit">
+                            Remove
+                        </button>
+                    </form>
+                    {% elif item.transaction is not none %}
+                        {% if item.transaction.gifter_id == session['user_id'] %}
+                        <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
+                            <input type="hidden" id="transaction_id" name="transaction_id"
+                                   value="{{ item.transaction.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                                Unclaim
+                            </button>
+                        </form>
                         {% else %}
-                        <td>
-                            <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
-                        </td>
+                        <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
                         {% endif %}
                     {% else %}
-                    <tr>
-                        <td>
-                            <form action="{{ request.path }}/transactions" method="post">
-                                <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
-                                <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
-                                <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
-                                <button class="btn btn-primary btn-sm" type="submit">Claim!</button>
-                            </form>
-                        </td>
+                    <form action="{{ request.path }}/transactions" method="post">
+                        <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
+                        <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
+                        <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
+                        <button class="btn btn-primary btn-sm" type="submit">
+                            Claim
+                        </button>
+                    </form>
                     {% endif %}
-                        <td><span data-toggle="tooltip" title="{{ item.description }}">{{ item.description }}</span></td>
-                        <td><a href="{{ item.location }}"><span data-toggle="tooltip" title="{{ item.location }}">{{ item.location }}</span></a></td>
-                        {% if item.priority == 'low' %}
-                            <td class="table-danger">{{ item.priority }}</td>
-                        {% elif item.priority == 'medium' %}
-                            <td class="table-warning">{{ item.priority }}</td>
-                        {% elif item.priority == 'high' %}
-                            <td class="table-success">{{ item.priority }}</td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                        <td>{{ "${:,.2f}".format(item.price) }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="4"></th>
-                        <td>{{ "${:,.2f}".format(total) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-    {% endif %}
-    {% if user.id == session['user_id'] %}
-    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
-        Add to wishlist
-    </button>
-    {% endif %}
+    </div>
 </div>
-
 <!-- modals -->
-<div class="modal fade" id="wishlistModal" tabindex="-1" role="dialog" aria-labelledby="wishlistModalLabel" aria-hidden="true">
+<div class="modal fade" id="wishlistModal" tabindex="-1" role="dialog" aria-labelledby="wishlistModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -114,7 +114,8 @@ wishlist
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="question">?</span>
                             </div>
-                            <input name="description" type="text" class="form-control" placeholder="description" autocomplete="off" aria-label="question">
+                            <input name="description" type="text" class="form-control" placeholder="description"
+                                   autocomplete="off" aria-label="question">
                         </div>
                     </div>
                     <div class="form-group">
@@ -122,7 +123,8 @@ wishlist
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="at">@</span>
                             </div>
-                            <input name="location" type="url" class="form-control" placeholder="location" autocomplete="off" aria-label="location" aria-describedby="at">
+                            <input name="location" type="url" class="form-control" placeholder="location"
+                                   autocomplete="off" aria-label="location" aria-describedby="at">
                         </div>
                     </div>
                     <div class="form-group">
@@ -130,7 +132,8 @@ wishlist
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="cash">$</span>
                             </div>
-                            <input name="price" type="number" min="0.01" step="0.01" class="form-control" placeholder="price" aria-label="price" aria-describedby="cash">
+                            <input name="price" type="number" min="0.01" step="0.01" class="form-control"
+                                   placeholder="price" aria-label="price" aria-describedby="cash">
                         </div>
                     </div>
                     <div class="form-group">
