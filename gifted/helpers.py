@@ -9,7 +9,7 @@ from werkzeug.utils import redirect
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get('username') is None:
+        if session.get('user_id') is None:
             return redirect(url_for('main.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -26,5 +26,3 @@ def validate(username, password, password_confirm=None, redirect_to='main.login'
     if password_confirm is not None and password != password_confirm:
         flash('Passwords must match!', 'warning')
         return redirect(url_for(redirect_to))
-
-

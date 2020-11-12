@@ -18,10 +18,18 @@ wishlist
         <!-- This is for the currently logged in user, do not render progress! -->
         {% if user.id == session['user_id'] %}
             <h2>My Wishlist</h2>
+            {% if wishlist|length == 0 %}
+            <p class="lead">
+                Start your wishlist so gifters can begin gifting!
+            </p>
+            {% else %}
             <p class="lead">Your wishlist total is ${{ progress.total }}</p>
-            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
-                Add to wishlist
-            </button>
+            {% endif %}
+            <div>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#wishlistModal">
+                    Add to wishlist
+                </button>
+            </div>
         <!-- This is for every other user, show progress with friendly messages! -->
         {% else %}
             <h2>{{ user.first_name }}'s Wishlist</h2>

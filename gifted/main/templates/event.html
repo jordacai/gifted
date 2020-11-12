@@ -19,43 +19,46 @@ event
             <a class="btn btn-primary btn-lg" href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}"
                role="button">View my wishlist</a>
         </p>
-        <hr class="my-4">
+        <hr class="my-3">
         <p class="lead">You are on the hook for ${{ liability }}</p>
         <a href="/events/{{ event.id }}/purchases/{{ session['user_id'] }}">Manage my purchases</a>
     </div>
 
     <div class="card-columns">
         {% for user in event.users %}
-        {% if user.id != logged_in_user.id %}
-        {% if user.id == logged_in_user.pair.giftee_id %}
+            {% if user.id != logged_in_user.id %}
+                {% if user.id == logged_in_user.pair.giftee_id %}
         <div class="card border-primary">
             <div class="card-header"><strong>This is your person!</strong></div>
             <div class="card-body">
                 <h5 class="card-title text-primary">{{ user.first_name }}</h5>
-        {% else %}
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ user.first_name }}</h5>
-        {% endif %}
-                {% if progress.get(user.id).percent == '100' %}
-                <p>wishlist is complete!</p>
-                {% elif progress.get(user.id) is none %}
-                <p>wishlist is not started</p>
                 {% else %}
-                <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ user.first_name }}</h5>
                 {% endif %}
-                <div class="progress mb-3">
-                    <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
-                         style="width: {{ progress.get(user.id).percent }}%"
-                         aria-valuenow="{{ progress.get(user.id).percent }}" aria-valuemin="0"
-                         aria-valuemax="100">
+            {% if progress.get(user.id).percent == '100' %}
+                        <p>wishlist is complete!</p>
+            {% elif progress.get(user.id) is none %}
+                        <p>wishlist is not started</p>
+            {% else %}
+                        <p>wishlist total is ${{ progress.get(user.id).total }}</p>
+            {% endif %}
+                        <div class="progress mb-3">
+                            <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                                 style="width: {{ progress.get(user.id).percent }}%"
+                                 aria-valuenow="{{ progress.get(user.id).percent }}" aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View
+                            wishlist</a>
                     </div>
                 </div>
-                <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View wishlist</a>
+            {% endif %}
+        {% endfor %}
             </div>
         </div>
-        {% endif %}
-        {% endfor %}
     </div>
 </div>
 {% endblock %}
