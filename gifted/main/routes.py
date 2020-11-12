@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, request, flash, url_for, session, current_app
 from flask_mail import Message
-from sqlalchemy import func
 from werkzeug import security
 from werkzeug.utils import redirect
 
@@ -94,6 +93,7 @@ def register():
 
 
 @main.route('/events/<event_id>')
+@login_required
 def event(event_id):
     event = Event.query.get(event_id)
     user = User.query.get(session['user_id'])
@@ -104,6 +104,7 @@ def event(event_id):
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
+@login_required
 def wishlist(event_id, user_id):
     if request.method == 'POST':
         description = request.form.get('description')
@@ -130,6 +131,7 @@ def wishlist(event_id, user_id):
 
 
 @main.route('/events/<event_id>/purchases/<user_id>')
+@login_required
 def purchases(event_id, user_id):
     event = Event.query.get(event_id)
     transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user_id).all()
@@ -140,6 +142,7 @@ def purchases(event_id, user_id):
 
 
 @main.route('/events/<event_id>/purchases/<user_id>/delete', methods=['POST'])
+@login_required
 def remove_purchase(event_id, user_id):
     purchase_id = request.form.get('purchase_id')
     purchase = Transaction.query.get(purchase_id)
@@ -150,6 +153,7 @@ def remove_purchase(event_id, user_id):
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
+@login_required
 def remove_item(event_id, user_id, item_id):
     item_id = request.form.get('item_id')
     item = Item.query.get(item_id)
@@ -160,6 +164,7 @@ def remove_item(event_id, user_id, item_id):
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/transactions', methods=['POST'])
+@login_required
 def claim_item(event_id, user_id):
     item_id = request.form.get('item_id')
     gifter_id = request.form.get('gifter_id')
@@ -176,6 +181,7 @@ def claim_item(event_id, user_id):
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/transactions/<transaction_id>/delete', methods=['POST'])
+@login_required
 def unclaim_item(event_id, user_id, transaction_id):
     if transaction_id != request.form.get('transaction_id'):
         flash('Transaction identifiers do not match.', 'warning')
