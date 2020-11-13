@@ -29,7 +29,7 @@ event
     </div>
 </div>
 {% if event.users %}
-<div class="container">
+<div class="container mb-5">
     <h4>Users</h4>
     <div class="table-responsive">
         <table class="table">
@@ -63,9 +63,49 @@ event
             </tbody>
         </table>
     </div>
-    {% endif %}
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
-      Add ad-hoc user
+{% endif %}
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#existingUserModal">
+      Add existing user
+    </button>
+<!--    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">-->
+<!--      Add ad-hoc user-->
+<!--    </button>-->
+</div>
+
+{% if event.invites %}
+<div class="container mb-5">
+    <h4>Invites</h4>
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">email</th>
+                    <th scope="col">expired</th>
+                    <th scope="col">code</th>
+                    <th scope="col">used</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invite in event.invites %}
+                <tr>
+                    <td>{{ invite.email }}</td>
+                    <td>{{ invite.expires_on | is_expired }}</td>
+                    <td>{{ invite.code }}</td>
+                    <td>{{ invite.is_used | pretty_boolean }}</td>
+                    <td>
+                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
+                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+    <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
+      Invite someone
     </button>
 </div>
 
@@ -100,6 +140,45 @@ event
         </div>
     </div>
 </div>
+<div class="modal fade" id="existingUserModal" tabindex="-1" role="dialog" aria-labelledby="existingUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="existingUserModalLabel">Add users</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/events/{{ event.id }}/users" method="post">
+                {% if users|length == 0 %}
+                <div class="modal-body">
+                    <p>All existing users already belong to this event!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal">Okay</button>
+                </div>
+                {% else %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="shuffledUsers">Select users to add to this event</label>
+                    </div>
+                    <div class="form-group">
+                        <select multiple class="form-control form-control-lg" id="users" name="users">
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add users</button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -130,6 +209,32 @@ event
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Create user</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteModalLabel">Invite someone to this event</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/invites" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group col-sm">
+                            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
+                            <input hidden name="eventId" value="{{ event.id }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Invite</button>
                 </div>
             </form>
         </div>

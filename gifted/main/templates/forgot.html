@@ -8,12 +8,13 @@ register
 <div class="container">
     <div class="jumbotron">
         <form action="/forgot" method="post">
-            <h4>Password reset</h4>
             <p class="lead">Did you forget your password? No worries!</p>
             <p>Simply provide your email address and we'll send you an email with instructions on resetting it.</p>
-            <input class="form-control" autocomplete="off" name="email" placeholder="email" type="text" autofocus
+            <div class="form-group">
+                <input class="form-control" autocomplete="off" name="email" placeholder="email" type="text" autofocus
                    required>
-            <button class="btn btn-primary" type="submit">send reset email</button>
+                <button class="btn btn-primary" type="submit">send reset email</button>
+            </div>
         </form>
     </div>
 </div>

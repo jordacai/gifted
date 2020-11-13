@@ -100,7 +100,7 @@ def event(event_id):
     liability = Transaction.get_user_liability(event.id, user.id)
     progress = get_event_progress(event_id)
     return render_template('event.html', event=event, progress=progress, logged_in_user=user,
-                           liability="{:.2f}".format(liability))
+                           liability=liability)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
@@ -135,10 +135,8 @@ def wishlist(event_id, user_id):
 def purchases(event_id, user_id):
     event = Event.query.get(event_id)
     transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user_id).all()
-    total = 0
-    for transaction in transactions:
-        total = total + transaction.item.price
-    return render_template('purchases.html', event=event, purchases=transactions, total=total)
+    liability = Transaction.get_user_liability(event_id, user_id)
+    return render_template('purchases.html', event=event, purchases=transactions, liability=liability)
 
 
 @main.route('/events/<event_id>/purchases/<user_id>/delete', methods=['POST'])
@@ -249,7 +247,6 @@ def get_event_progress(event_id):
         percent = purchased / total * 100 if total != 0 else 0
         progress[user_id] = {'purchased': str(purchased), 'total': str(total), 'percent': "{:.2f}".format(percent)}
 
-    print(progress)
     return progress
 
 
@@ -258,5 +255,4 @@ def get_wishlist_progress(event_id, user_id):
     purchased = Transaction.get_user_total(event_id, user_id)
     percent = purchased / total * 100 if total != 0 else 0
     progress = {'purchased': str(purchased), 'total': str(total), 'percent': "{:.2f}".format(percent)}
-    print(progress)
     return progress

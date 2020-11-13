@@ -12,7 +12,7 @@ event
 
 {% block main %}
 <div class="container">
-    <div class="jumbotron jumbotron-fluid">
+    <div class="jumbotron">
         <h1>{{ event.title }}</h1>
         <p class="lead">{{ event.description }}</p>
         <p class="lead">
@@ -20,8 +20,12 @@ event
                role="button">View my wishlist</a>
         </p>
         <hr class="my-3">
-        <p class="lead">You are on the hook for ${{ liability }}</p>
+        {% if liability == 0 %}
+        <p class="lead">Start purchasing!</p>
+        {% else %}
+        <p class="lead">You are on the hook for <strong>${{ liability }}</strong></p>
         <a href="/events/{{ event.id }}/purchases/{{ session['user_id'] }}">Manage my purchases</a>
+        {% endif %}
     </div>
 
     <div class="card-columns">
@@ -37,7 +41,7 @@ event
                     <div class="card-body">
                         <h5 class="card-title">{{ user.first_name }}</h5>
                 {% endif %}
-            {% if progress.get(user.id).percent == '100' %}
+            {% if progress.get(user.id).percent == '100.00' %}
                         <p>wishlist is complete!</p>
             {% elif progress.get(user.id) is none %}
                         <p>wishlist is not started</p>

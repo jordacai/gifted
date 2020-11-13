@@ -11,7 +11,6 @@ main .card
 {
     text-align: center;
     width: auto;
-    display: inline-block;
 }
 
 main
@@ -46,8 +45,17 @@ main tfoot
    max-width: 100%;
 }
 
-.card-columns {
-    display: inline-block;
+/* fixed-width input group labels */
+.input-group>.input-group-prepend {
+    flex: 0 0 25%;
+}
+.input-group .input-group-text {
+    width: 100%;
+}
+
+/* hide input placeholder on focus */
+input:focus::placeholder {
+  color: transparent;
 }
 
 @media (max-width: 700px) {

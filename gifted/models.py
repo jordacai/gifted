@@ -100,6 +100,7 @@ class Event(db.Model):
                             backref=db.backref('events', lazy=True),
                             lazy=True)
     pairs = db.relationship('Pair', backref='event', lazy=True)
+    invites = db.relationship('Invite', backref='event', lazy=True)
 
     def __repr__(self):
         return '<Event id=%r, title=%r, starts_on=%r, ends_on=%r>' % (self.id, self.title, self.starts_on, self.ends_on)
@@ -148,7 +149,6 @@ class Item(db.Model):
     location = db.Column(db.String(1024), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     priority = db.Column(db.String(40), default='medium')
-    is_purchased = db.Column(db.Integer, default=0)
     transaction = db.relationship('Transaction', uselist=False, backref='item', cascade='all,delete')
 
     def __repr__(self):
