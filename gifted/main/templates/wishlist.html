@@ -61,7 +61,9 @@ wishlist
         <div class="card-columns">
             {% for item in wishlist %}
             <div class="card">
-                <div class="card-header">{{ item.description }}</div>
+                <div class="card-header">
+                    {{ item.description }}
+                </div>
                 <div class="card-body">
                     <h5 class="card-subtitle mb-2 text-muted">${{ item.price }}</h5>
                     {% if item.location %}
@@ -120,34 +122,34 @@ wishlist
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="question">?</span>
+                                <span class="input-group-text" id="question">description</span>
                             </div>
-                            <input name="description" type="text" class="form-control" placeholder="description"
+                            <input name="description" type="text" class="form-control" placeholder="what would you like?"
                                    autocomplete="off" aria-label="question">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="at">@</span>
+                                <span class="input-group-text" id="pre-url">url</span>
                             </div>
-                            <input name="location" type="url" class="form-control" placeholder="location"
-                                   autocomplete="off" aria-label="location" aria-describedby="at">
+                            <input name="location" type="url" class="form-control" placeholder="where can we find it?"
+                                   autocomplete="off" aria-describedby="pre-url">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="cash">$</span>
+                                <span class="input-group-text" id="pre-price">price ($)</span>
                             </div>
                             <input name="price" type="number" min="0.01" step="0.01" class="form-control"
-                                   placeholder="price" aria-label="price" aria-describedby="cash">
+                                   placeholder="how much is it?" aria-describedby="pre-price">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text">!</span>
+                                <span class="input-group-text">priority</span>
                             </div>
                             <select class="form-control" id="priority" name="priority">
                                 <option selected disabled>pick a priority</option>

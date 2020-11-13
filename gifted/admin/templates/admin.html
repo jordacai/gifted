@@ -42,45 +42,6 @@ admin
     </button>
 </div>
 
-<div class="container">
-    <h4>Invites</h4>
-    {% if not invites %}
-        <p>No invites pending</p>
-    {% else %}
-    <div class="table-responsive">
-        <table class="table">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">email</th>
-                    <th scope="col">expired</th>
-                    <th scope="col">code</th>
-                    <th scope="col">used</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invite in invites %}
-                <tr>
-                    <td>{{ invite.email }}</td>
-                    <td>{{ invite.expires_on | is_expired }}</td>
-                    <td>{{ invite.code }}</td>
-                    <td>{{ invite.is_used | pretty_boolean }}</td>
-                    <td>
-                        <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
-                            <button class="btn btn-danger btn-sm" type="submit">revoke</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-    <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
-      Invite someone
-    </button>
-</div>
-
 <!-- modals -->
 <div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -113,44 +74,6 @@ admin
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Create event</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="inviteModalLabel">Invite someone to an event</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="/admin/invites" method="post">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="input-group col-sm">
-                            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group col-sm">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text" for="eventSelect">event</label>
-                            </div>
-                            <select class="custom-select" id="eventSelect" name="eventId">
-                                <option selected>Pick an event...</option>
-                                {% for event in events %}
-                                    <option value="{{ event.id }}">{{ event.title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Invite</button>
                 </div>
             </form>
         </div>
