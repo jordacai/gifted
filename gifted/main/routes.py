@@ -6,7 +6,7 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
-from gifted.models import User, Invite, Event, Item, Transaction, generate_code
+from gifted.models import User, Invite, Event, Item, Transaction, generate_code, Reset
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -207,17 +207,56 @@ def logout():
 def forgot():
     if request.method == 'POST':
         email = request.form.get('email')
+        user = User.query.filter_by(username=email).first()
+        if user is None:
+            flash('That account does not exist.', 'warning')
+            return redirect(url_for('main.forgot'))
         code = generate_code()
+        reset = Reset(user_id=user.id, code=code)
+        db.session.add(reset)
+        db.session.commit()
+
         message = Message('Gifted password reset',
                           sender=current_app.config.get("MAIL_USERNAME"),
                           recipients=[email])
 
         message.html = render_template('forgot_password_email.html', email=email, code=code)
-        mail.send(message)
+        # mail.send(message)
         flash('A password reset email was sent to {}!'.format(email), 'success')
         return redirect(url_for('main.login'))
-
     return render_template('forgot.html')
+
+
+@main.route('/reset', methods=['GET', 'POST'])
+def reset():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        code = request.form.get('code')
+        password = request.form.get('password')
+        password_confirm = request.form.get('passwordConfirm')
+
+        user = User.query.filter_by(username=username).first()
+        reset = Reset.query.filter_by(user_id=user.id, code=code).first()
+
+        if user is None or reset is None:
+            flash('That code and email combination is invalid!', 'warning')
+            return redirect(url_for('main.reset'))
+        elif code != reset.code or reset.is_expired():
+            flash('That code does not match or it has expired!', 'warning')
+            return redirect(url_for('main.reset'))
+
+        if password != password_confirm:
+            flash('Passwords must match!', 'warning')
+            return redirect(url_for('main.reset'))
+
+        password_hash = security.generate_password_hash(password)
+        user.password = password_hash
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Successfully updated password for {username}!', 'success')
+        return redirect(url_for('main.login'))
+
+    return render_template('reset.html', email=request.args.get('email'), code=request.args.get('code'))
 
 
 @main.app_template_filter('pretty_boolean')

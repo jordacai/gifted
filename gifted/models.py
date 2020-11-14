@@ -25,6 +25,21 @@ class Pair(db.Model):
         return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)
 
 
+class Reset(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    code = db.Column(db.String(80), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.now())
+    expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=1))
+
+    def __repr__(self):
+        return '<Reset id=%r, user_id=%r, code=%r>' % (self.id, self.user_id, self.code)
+
+    def is_expired(self):
+        now = datetime.now()
+        return True if now > self.expires_on else False
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)

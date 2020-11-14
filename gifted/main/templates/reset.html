@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+reset password
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <form action="/reset" method="post" autocomplete="off" oninput='passwordConfirm.setCustomValidity(passwordConfirm.value != password.value ? "Passwords do not match!" : "")'>
+        <div class="form-group">
+            {% if email %}
+                <small id="usernameHelp" class="form-text text-muted">Copied from your reset email</small>
+                <input class="form-control" name="username" placeholder="username (email)" type="text" value="{{ email }}" aria-describedby="usernameHelp" readonly>
+            {% else %}
+                <small id="noUsernameHelp" class="form-text text-muted">This is the email associated with your account</small>
+                <input class="form-control" name="username" autocomplete="off" placeholder="username (email)" type="text" aria-describedby="noUsernameHelp" autofocus>
+            {% endif %}
+
+        </div>
+        <div class="form-group">
+            {% if code %}
+                <small id="codeHelp" class="form-text text-muted">Copied from your reset email</small>
+                <input class="form-control" name="code" placeholder="code" type="text" value="{{ code }}" aria-describedby="codeHelp" readonly>
+            {% else %}
+                <small id="noCodeHelp" class="form-text text-muted">This is your registration code, copy it from your email</small>
+                <input class="form-control" name="code" autocomplete="off" placeholder="code" type="text" aria-describedby="noCodeHelp">
+            {% endif %}
+
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="password" placeholder="enter new password" type="password" autofocus>
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="passwordConfirm" placeholder="confirm new password" type="password">
+        </div>
+        <button class="btn btn-primary" type="submit">reset my password</button>
+    </form>
+</div>
+{% endblock %}
