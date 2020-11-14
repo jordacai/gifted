@@ -93,14 +93,12 @@ def delete_event(event_id):
 @admin.route('/admin/events/<event_id>/users', methods=['POST'])
 def add_users(event_id):
     event = Event.query.get(event_id)
-    print(event.users)
     users = request.form.getlist('users')
     for user_id in users:
         user = User.query.get(user_id)
         event.users.append(user)
         db.session.commit()
 
-    print(event.users)
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 

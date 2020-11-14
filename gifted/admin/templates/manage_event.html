@@ -6,12 +6,12 @@ event
 
 {% block main %}
 <div class="container">
-    <div class="card w-75 mb-3">
+    <div class="card">
         <div class="card-body">
             <h5 class="card-title">{{ event.title }}</h5>
             <p class="card-text">{{ event.description }}</p>
             {% if not event.users %}
-            <p>This event has no users... yet!</p>
+            <p>This event has no users...yet!</p>
             {% else %}
                 {% if not event.pairs %}
                 <p>This event has not been shuffled!</p>
