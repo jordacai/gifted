@@ -5,11 +5,15 @@ wishlist
 {% endblock %}
 
 {% block top_nav %}
-<a class="nav-item nav-link" href="/">events</a>
+<a class="nav-item nav-link" href="/">Events</a>
 <span class="navbar-text">/</span>
 <a class="nav-item nav-link" href="/events/{{ event.id }}">{{ event.title }}</a>
 <span class="navbar-text">/</span>
-<a class="nav-item nav-link active" href="#">{{ user.first_name }}'s wishlist</a>
+{% if user.id == session['user_id'] %}
+<a class="nav-item nav-link active" href="#">My wishlist</a>
+{% else %}
+<a class="nav-item nav-link active" href="#">{{ user.first_name }} {{ user.last_name }}'s wishlist</a>
+{% endif %}
 {% endblock %}
 
 {% block main %}
@@ -49,7 +53,7 @@ wishlist
                 {% else %}
                 <p class="lead">
                     Gifters have claimed <strong>${{ progress.purchased }}</strong> <br>
-                    of the <strong>${{ progress.total }}</strong> worth of stuff {{ user.first_name }} requested.
+                    of the <strong>${{ progress.total }}</strong> total that {{ user.first_name }} requested.
                 </p>
                 <div class="progress bg-white mb-5">
                     <div class="progress-bar progress-bar-striped bg-success" style="width: {{ progress.percent }}%;"></div>
@@ -65,10 +69,12 @@ wishlist
                     {{ item.description }}
                 </div>
                 <div class="card-body">
-                    <h5 class="card-subtitle mb-2 text-muted">${{ item.price }}</h5>
+                    <h5 class="card-subtitle text-success mb-2">${{ item.price }}</h5>
                     {% if item.location %}
                     <p class="mb-2">
-                        <a class="card-link" href="{{ item.location }}">Find me here</a>
+                        <a class="card-link" href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
+                            Find me here
+                        </a>
                     </p>
                     {% endif %}
                     {% if item.user_id == session['user_id'] %}

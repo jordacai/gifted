@@ -5,7 +5,7 @@ purchases
 {% endblock %}
 
 {% block top_nav %}
-<a class="nav-item nav-link" href="/">events</a>
+<a class="nav-item nav-link" href="/">Events</a>
 <span class="navbar-text">/</span>
 <a class="nav-item nav-link" href="/events/{{ event.id }}">{{ event.title }}</a>
 <span class="navbar-text">/</span>
@@ -23,29 +23,37 @@ purchases
         {% else %}
         <div>
             <p class="lead">
-                You have made {{ purchases|length }} purchase(s) totaling <strong>${{ liability }}</strong>.
+                You have made {{ purchases|length }} purchase(s) totaling <strong>${{ liability }}.</strong>
             </p>
         </div>
+        {% endif %}
     </div>
 
-    <div class="card-columns">
-        {% for purchase in purchases %}
-        <div class="card">
-            <div class="card-header">
-                {{ purchase.giftee.first_name }} {{ purchase.giftee.last_name }}
+    {% for giftee, transactions in grouped_transactions.items() %}
+    <div class="mb-4 border-bottom">
+        <h5>Your purchases for {{ giftee }}</h5>
+        <div class="card-columns">
+            {% for transaction in transactions %}
+            <div class="card">
+                <div class="card-header">
+                    <p>{{ transaction.item.description }}</p>
+                    <p class="card-subtitle text-muted">for {{ giftee }}</p>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-subtitle text-success mb-2">${{ transaction.item.price }}</h5>
+                    <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
+                        <input type="hidden" id="purchase_id" name="purchase_id" value="{{ transaction.id }}">
+                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                            Unclaim
+                        </button>
+                    </form>
+                    <p class="card-text"><small class="text-muted">Claimed @ {{ transaction.transacted_on }}</small></p>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="lead">{{ purchase.item.description }}</p>
-                <h5 class="card-subtitle mb-2 text-muted">${{ purchase.item.price }}</h5>
-                <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
-                    <input type="hidden" id="purchase_id" name="purchase_id" value="{{ purchase.id }}">
-                    <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">Unclaim</button>
-                </form>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
+    {% endfor %}
 </div>
 {% endblock %}
 {% block bot_nav %}

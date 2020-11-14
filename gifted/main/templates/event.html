@@ -5,7 +5,7 @@ event
 {% endblock %}
 
 {% block top_nav %}
-<a class="nav-item nav-link" href="/">events</a>
+<a class="nav-item nav-link" href="/">Events</a>
 <span class="navbar-text">/</span>
 <a class="nav-item nav-link active" href="#">{{ event.title }}</a>
 {% endblock %}
@@ -35,11 +35,11 @@ event
         <div class="card border-primary">
             <div class="card-header"><strong>This is your person!</strong></div>
             <div class="card-body">
-                <h5 class="card-title text-primary">{{ user.first_name }}</h5>
+                <h5 class="card-title text-primary">{{ user.first_name }} {{ user.last_name }}</h5>
                 {% else %}
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">{{ user.first_name }}</h5>
+                        <h5 class="card-title">{{ user.first_name }} {{ user.last_name }}</h5>
                 {% endif %}
             {% if progress.get(user.id).percent == '100.00' %}
                         <p>wishlist is complete!</p>

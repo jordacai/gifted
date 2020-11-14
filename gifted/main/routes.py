@@ -6,7 +6,8 @@ from werkzeug import security
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail
-from gifted.models import User, Invite, Event, Item, Transaction, generate_code, Reset
+from gifted.helpers import generate_code, group_by
+from gifted.models import User, Invite, Event, Item, Transaction, Reset
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -136,7 +137,9 @@ def purchases(event_id, user_id):
     event = Event.query.get(event_id)
     transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user_id).all()
     liability = Transaction.get_user_liability(event_id, user_id)
-    return render_template('purchases.html', event=event, purchases=transactions, liability=liability)
+    grouped_transactions = group_by(transactions, projection=lambda x: x.giftee.get_full_name())
+    return render_template('purchases.html', event=event, purchases=transactions, liability=liability,
+                           grouped_transactions=grouped_transactions)
 
 
 @main.route('/events/<event_id>/purchases/<user_id>/delete', methods=['POST'])
@@ -221,7 +224,7 @@ def forgot():
                           recipients=[email])
 
         message.html = render_template('forgot_password_email.html', email=email, code=code)
-        # mail.send(message)
+        mail.send(message)
         flash('A password reset email was sent to {}!'.format(email), 'success')
         return redirect(url_for('main.login'))
     return render_template('forgot.html')

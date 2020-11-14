@@ -1,5 +1,4 @@
 import random
-import string
 from copy import copy
 from datetime import datetime, timedelta
 
@@ -10,10 +9,6 @@ from gifted import db
 event_user = db.Table('event_user',
                       db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
-
-
-def generate_code(size=8, chars=string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 
 class Pair(db.Model):
@@ -51,7 +46,10 @@ class User(db.Model):
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
 
     def __repr__(self):
-        return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.first_name + ' ' + self.last_name)
+        return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.get_full_name())
+
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
 
 class Transaction(db.Model):

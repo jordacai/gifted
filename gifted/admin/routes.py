@@ -5,7 +5,8 @@ from flask_mail import Message
 from werkzeug.utils import redirect
 
 from gifted import db, mail
-from gifted.models import Invite, Event, User, generate_code
+from gifted.helpers import generate_code
+from gifted.models import Invite, Event, User
 
 admin = Blueprint('admin', __name__,
                   template_folder='templates',
@@ -66,7 +67,7 @@ def delete_event(event_id):
     flash(f'Deleted event {event}!', 'success')
     return redirect(url_for('admin.index'))
 
-
+# this was for ad-hoc user creation - may still be useful
 # @admin.route('/admin/events/<event_id>/users', methods=['POST'])
 # def create_user(event_id):
 #     username = request.form.get('username')
