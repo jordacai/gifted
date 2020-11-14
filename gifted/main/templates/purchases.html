@@ -31,7 +31,7 @@ purchases
 
     {% for giftee, transactions in grouped_transactions.items() %}
     <div class="mb-4 border-bottom">
-        <h5>Your purchases for {{ giftee }}</h5>
+        <h5 class="font-italic">Your purchases for {{ giftee }}</h5>
         <div class="card-columns">
             {% for transaction in transactions %}
             <div class="card">
@@ -40,7 +40,7 @@ purchases
                     <p class="card-subtitle text-muted">for {{ giftee }}</p>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-subtitle text-success mb-2">${{ transaction.item.price }}</h5>
+                    <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>
                     <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
                         <input type="hidden" id="purchase_id" name="purchase_id" value="{{ transaction.id }}">
                         <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
