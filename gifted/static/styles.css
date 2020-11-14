@@ -20,6 +20,8 @@ main
 
     /* center contents */
     text-align: center;
+
+    min-height: 100%;
 }
 
 main img
