@@ -10,6 +10,10 @@ event_user = db.Table('event_user',
                       db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
+event_admin = db.Table('event_admin',
+                       db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
+
 
 class Pair(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
@@ -37,6 +41,7 @@ class Reset(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    registrar_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(240), nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
@@ -44,6 +49,7 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
+    registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.get_full_name())
@@ -90,15 +96,20 @@ class Transaction(db.Model):
 class Invite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    invited_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     email = db.Column(db.String(80), nullable=False)
-    is_valid = db.Column(db.Integer, default=1)
     created_on = db.Column(db.DateTime(), default=datetime.now())
     expires_on = db.Column(db.DateTime(), default=datetime.now() + timedelta(days=7))
     code = db.Column(db.String(80), nullable=False)
+    is_admin = db.Column(db.Integer, default=0)
     is_used = db.Column(db.Integer, default=0)
 
     def __repr__(self):
-        return '<Invite id=%r, email=%r, code=%r>' % (self.id, self.email, self.code)
+        return '<Invite id=%r, email=%r, code=%r, is_admin=%r>' % (self.id, self.email, self.code, self.is_admin)
+
+    def is_expired(self):
+        now = datetime.now()
+        return True if now > self.expires_on else False
 
 
 class Event(db.Model):
@@ -112,6 +123,10 @@ class Event(db.Model):
                             secondary=event_user,
                             backref=db.backref('events', lazy=True),
                             lazy=True)
+    admins = db.relationship('User',
+                             secondary=event_admin,
+                             backref=db.backref('administration', lazy=True),
+                             lazy=True)
     pairs = db.relationship('Pair', backref='event', lazy=True)
     invites = db.relationship('Invite', backref='event', lazy=True)
 

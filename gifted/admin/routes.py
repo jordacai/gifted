@@ -15,19 +15,24 @@ admin = Blueprint('admin', __name__,
 
 @admin.route('/admin')
 def index():
-    events = Event.query.order_by(Event.id.desc()).all()
-    return render_template('admin.html', events=events)
+    user = User.query.get(session['user_id'])
+    return render_template('admin.html', events=user.administration)
 
 
 @admin.route('/admin/events/<event_id>')
 def manage_event(event_id):
     # todo: this is pretty hacky, is there a way to push this onto the db?
     event = Event.query.get(event_id)
-    ids = []
+    existing_ids = []
     for user in event.users:
-        ids.append(user.id)
-    users = User.query.filter(User.id.notin_(ids)).all()
-    return render_template('manage_event.html', event=event, users=users)
+        existing_ids.append(user.id)
+
+    available_users = User.query\
+        .filter(User.id.notin_(existing_ids))\
+        .filter(User.registrar_id == session['user_id'])\
+        .all()
+
+    return render_template('manage_event.html', event=event, available_users=available_users)
 
 
 @admin.route('/admin/events', methods=['POST'])
@@ -40,6 +45,7 @@ def create_event():
     event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
     user = User.query.filter_by(id=session['user_id']).first()
     event.users.append(user)
+    event.admins.append(user)
     db.session.add(event)
     db.session.commit()
 
@@ -103,6 +109,18 @@ def add_users(event_id):
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
+@admin.route('/admin/remove-user', methods=['POST'])
+def remove_user():
+    event_id = request.form.get('eventId')
+    user_id = request.form.get('userId')
+    event = Event.query.get(event_id)
+    user = User.query.get(user_id)
+    event.users.remove(user)
+    db.session.commit()
+    flash(f'Removed {user.get_full_name()} from this event!', 'success')
+    return redirect(url_for('admin.manage_event', event_id=event_id))
+
+
 @admin.route('/admin/users/<user_id>/delete', methods=['POST'])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -116,8 +134,19 @@ def delete_user(user_id):
 def invite():
     email = request.form.get('email')
     event_id = request.form.get('eventId')
+    is_admin = request.form.get('isAdmin')
+
+    user = User.query.filter_by(username=email).first()
+    if user is not None:
+        flash('A user already exists with that email!', 'warning')
+        return redirect(url_for('admin.manage_event', event_id=event_id))
+
     code = generate_code()
-    invitation = Invite(email=email, event_id=event_id, code=code)
+    if is_admin:
+        invitation = Invite(email=email, event_id=event_id, code=code, is_admin=1, invited_by=session['user_id'])
+    else:
+        invitation = Invite(email=email, event_id=event_id, code=code, invited_by=session['user_id'])
+
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email}!', 'success')
@@ -127,14 +156,14 @@ def invite():
                       recipients=[email])
 
     message.html = render_template('register_email.html', email=invitation.email, code=invitation.code)
-    mail.send(message)
+    #mail.send(message)
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
 @admin.route('/admin/invites/<invite_id>/revoke', methods=['POST'])
 def revoke(invite_id):
     invitation = Invite.query.filter_by(id=invite_id).first()
-    invitation.is_valid = 0
+    db.session.delete(invitation)
     db.session.commit()
     flash(f'Revoked {invitation.email}\'s invitation', 'success')
-    return redirect(url_for('admin.index'))
+    return redirect(url_for('admin.manage_event', event_id=invitation.event_id))

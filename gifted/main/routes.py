@@ -39,7 +39,7 @@ def login():
         if security.check_password_hash(pwhash=user.password, password=password):
             session['user_id'] = user.id
             session['username'] = request.form.get('username')
-            session['is_admin'] = user.is_admin
+            session['is_admin'] = len(user.administration) > 0 or user.is_admin
             flash('Logged in successfully', 'success')
             return redirect(url_for('main.index'))
         else:
@@ -48,6 +48,14 @@ def login():
 
     # it's a GET, render the template
     return render_template('login.html')
+
+
+@main.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    session.pop('is_admin', None)
+    return redirect(url_for('main.login'))
 
 
 @main.route('/register', methods=['GET', 'POST'])
@@ -79,9 +87,11 @@ def register():
             return redirect(url_for('main.register'))
 
         user = User(username=username, password=security.generate_password_hash(password),
-                    first_name=first_name, last_name=last_name)
+                    first_name=first_name, last_name=last_name, registrar_id=invitation.invited_by)
 
         event.users.append(user)
+        if invitation.is_admin:
+            event.admins.append(user)
         invitation.is_used = 1
         db.session.add(user)
         db.session.commit()
@@ -101,7 +111,7 @@ def event(event_id):
     liability = Transaction.get_user_liability(event.id, user.id)
     progress = get_event_progress(event_id)
     return render_template('event.html', event=event, progress=progress, logged_in_user=user,
-                           liability=liability)
+                           liability=liability, pair=user.pair)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
@@ -124,11 +134,8 @@ def wishlist(event_id, user_id):
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
-    transactions = Transaction.query.filter_by(event_id=event_id).all()
-    my_transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=session['user_id']).all()
     progress = get_wishlist_progress(event_id, user_id)
-    return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress,
-                           transactions=transactions, my_transactions=my_transactions)
+    return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
 
 
 @main.route('/events/<event_id>/purchases/<user_id>')
@@ -196,14 +203,6 @@ def unclaim_item(event_id, user_id, transaction_id):
     db.session.commit()
     flash('You unclaimed an item!', 'warning')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
-
-
-@main.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    session.pop('username', None)
-    session.pop('is_admin', None)
-    return redirect(url_for('main.login'))
 
 
 @main.route('/forgot', methods=['GET', 'POST'])
