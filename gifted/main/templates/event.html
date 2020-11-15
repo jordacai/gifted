@@ -13,18 +13,22 @@ event
 {% block main %}
 <div class="container">
     <div class="jumbotron">
-        <h1>{{ event.title }}</h1>
+        <h2>{{ event.title }}</h2>
         <p class="lead">{{ event.description }}</p>
         <p class="lead">
             <a class="btn btn-primary btn-lg" href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}"
                role="button">View my wishlist</a>
         </p>
         <hr class="my-3">
-        {% if liability == 0 %}
-        <p class="lead">Start purchasing!</p>
+        {% if event.users|length < 2 %}
+        <p class="lead">It's quiet in here...</p>
         {% else %}
+            {% if liability == 0 %}
+        <p class="lead">Start purchasing!</p>
+            {% else %}
         <p class="lead">You are on the hook for <strong>${{ liability }}</strong></p>
         <a href="/events/{{ event.id }}/purchases/{{ session['user_id'] }}">Manage my purchases</a>
+            {% endif %}
         {% endif %}
     </div>
 

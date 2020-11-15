@@ -6,7 +6,7 @@ event
 
 {% block main %}
 <div class="container">
-    <div class="card">
+    <div class="card mb-3">
         <div class="card-body">
             <h5 class="card-title">{{ event.title }}</h5>
             <p class="card-text">{{ event.description }}</p>
@@ -35,7 +35,6 @@ event
         <table class="table">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col">id</th>
                     <th scope="col">username</th>
                     <th scope="col">name</th>
                     <th scope="col">registered on</th>
@@ -46,17 +45,20 @@ event
             <tbody>
                 {% for user in event.users %}
                 <tr>
-                    <th scope="row">{{ user.id }}</th>
                     <td>{{ user.username }}</td>
                     <td>{{ user.first_name }} {{ user.last_name }}</td>
                     <td>{{ user.registered_on }}</td>
-                    <td>{{ user.is_admin | pretty_boolean }}</td>
-                    {% if user.is_admin == 0 %}
-                        <td>
-                            <form action="/admin/users/{{ user.id }}/delete" method="post">
-                                <button class="btn btn-danger btn-sm" type="submit">delete</button>
-                            </form>
-                        </td>
+                    {% if user in event.admins %}
+                    <td>True</td>
+                    {% else %}
+                    <td>False</td>
+                    <td>
+                        <form action="/admin/remove-user" method="post">
+                            <input hidden name="eventId" value="{{ event.id }}">
+                            <input hidden name="userId" value="{{ user.id }}">
+                            <button class="btn btn-danger btn-sm" type="submit">remove</button>
+                        </form>
+                    </td>
                     {% endif %}
                 </tr>
                 {% endfor %}
@@ -72,17 +74,18 @@ event
 <!--    </button>-->
 </div>
 
-{% if event.invites %}
 <div class="container mb-5">
+    {% if event.invites | length > 0 %}
     <h4>Invites</h4>
     <div class="table-responsive">
         <table class="table">
             <thead class="thead-light">
                 <tr>
                     <th scope="col">email</th>
-                    <th scope="col">expired</th>
                     <th scope="col">code</th>
-                    <th scope="col">used</th>
+                    <th scope="col">admin?</th>
+                    <th scope="col">used?</th>
+                    <th scope="col">expires</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -90,9 +93,10 @@ event
                 {% for invite in event.invites %}
                 <tr>
                     <td>{{ invite.email }}</td>
-                    <td>{{ invite.expires_on | is_expired }}</td>
                     <td>{{ invite.code }}</td>
-                    <td>{{ invite.is_used | pretty_boolean }}</td>
+                    <td>{{ invite.is_admin | pretty_boolean }}</td>
+                    <td>{{ invite.is_used  | pretty_boolean }}</td>
+                    <td>{{ invite.expires_on }}</td>
                     <td>
                         <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
                             <button class="btn btn-danger btn-sm" type="submit">revoke</button>
@@ -103,7 +107,9 @@ event
             </tbody>
         </table>
     </div>
-{% endif %}
+    {% else %}
+    <p>No pending invites</p>
+    {% endif %}
     <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
       Invite someone
     </button>
@@ -150,7 +156,7 @@ event
                 </button>
             </div>
             <form action="/admin/events/{{ event.id }}/users" method="post">
-                {% if users|length == 0 %}
+                {% if available_users|length == 0 %}
                 <div class="modal-body">
                     <p>All existing users already belong to this event!</p>
                 </div>
@@ -164,7 +170,7 @@ event
                     </div>
                     <div class="form-group">
                         <select multiple class="form-control form-control-lg" id="users" name="users">
-                            {% for user in users %}
+                            {% for user in available_users %}
                                 <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
                             {% endfor %}
                         </select>
@@ -227,9 +233,13 @@ event
                 <div class="modal-body">
                     <div class="form-group">
                         <div class="input-group col-sm">
-                            <input autocomplete="off" autofocus class="form-control" name="email" placeholder="email" type="email">
+                            <input class="form-control" autocomplete="off" autofocus name="email" placeholder="email" type="email">
                             <input hidden name="eventId" value="{{ event.id }}">
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <input class="form-check-input" type="checkbox" id="isAdmin" name="isAdmin" value="True">
+                        <label class="form-check-label" for="isAdmin">Is administrator?</label>
                     </div>
                 </div>
                 <div class="modal-footer">

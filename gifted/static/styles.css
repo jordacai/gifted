@@ -72,3 +72,8 @@ main tfoot
         column-count: 3;
     }
 }
+
+.footer {
+    height:40px;
+    margin-top:-40px;
+}

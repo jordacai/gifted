@@ -22,7 +22,7 @@
                 <div class="navbar-nav">
                     {% block top_nav%}{% endblock %}
                 </div>
-                {% if session.username %}
+                {% if session.user_id %}
                     <ul class="navbar-nav ml-auto mt-2">
                         {% if session.is_admin %}
                         <li class="nav-item"><a class="nav-link" href="/admin">admin</a></li>
