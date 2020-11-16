@@ -50,9 +50,26 @@ class User(db.Model):
     is_admin = db.Column(db.Integer, default=0)
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
+    children = db.relationship('Child', backref='parent', lazy=True)
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.get_full_name())
+
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
+
+class Child(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return '<Child id=%r, parent_id=%r, event_id=%r name=%r>' % \
+               (self.id, self.parent_id, self.event_id, self.get_full_name())
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'

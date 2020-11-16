@@ -6,7 +6,7 @@ from werkzeug.utils import redirect
 
 from gifted import db, mail
 from gifted.helpers import generate_code
-from gifted.models import Invite, Event, User
+from gifted.models import Invite, Event, User, Child
 
 admin = Blueprint('admin', __name__,
                   template_folder='templates',
@@ -73,29 +73,6 @@ def delete_event(event_id):
     flash(f'Deleted event {event}!', 'success')
     return redirect(url_for('admin.index'))
 
-# this was for ad-hoc user creation - may still be useful
-# @admin.route('/admin/events/<event_id>/users', methods=['POST'])
-# def create_user(event_id):
-#     username = request.form.get('username')
-#     password = request.form.get('password')
-#     password_confirm = request.form.get('passwordConfirm')
-#     first_name = request.form.get('firstName')
-#     last_name = request.form.get('lastName')
-#
-#     if password != password_confirm:
-#         flash('Passwords must match!', 'warning')
-#         return redirect(url_for('admin.event', event_id=event_id))
-#
-#     user = User(username=username, password=security.generate_password_hash(password),
-#                 first_name=first_name, last_name=last_name)
-#
-#     event = Event.query.get(event_id)
-#     event.users.append(user)
-#     db.session.add(user)
-#     db.session.commit()
-#     flash(f'Created user {user}!', 'success')
-#     return redirect(url_for('admin.event', event_id=event_id))
-
 
 @admin.route('/admin/events/<event_id>/users', methods=['POST'])
 def add_users(event_id):
@@ -106,6 +83,19 @@ def add_users(event_id):
         event.users.append(user)
         db.session.commit()
 
+    return redirect(url_for('admin.manage_event', event_id=event_id))
+
+
+@admin.route('/admin/add-user-child', methods=['POST'])
+def add_user_child():
+    parent_id = request.form.get('parent')
+    event_id = request.form.get('eventId')
+    first_name = request.form.get('firstName')
+    last_name = request.form.get('lastName')
+    child = Child(parent_id=parent_id, event_id=event_id, first_name=first_name, last_name=last_name)
+    db.session.add(child)
+    db.session.commit()
+    flash(f'Successfully added {child.get_full_name()} as a child of { child.parent.get_full_name()}!', 'success')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 

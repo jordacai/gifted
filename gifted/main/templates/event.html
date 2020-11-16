@@ -15,10 +15,9 @@ event
     <div class="jumbotron">
         <h2>{{ event.title }}</h2>
         <p class="lead">{{ event.description }}</p>
-        <p class="lead">
-            <a class="btn btn-primary btn-lg" href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}"
-               role="button">View my wishlist</a>
-        </p>
+        <a class="btn btn-primary" href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}" role="button">
+            View my wishlist
+        </a>
         <hr class="my-3">
         {% if event.users|length < 2 %}
         <p class="lead">It's quiet in here...</p>
@@ -53,8 +52,6 @@ event
             </div>
         </div>
     </div>
-
-
 
     <div class="card-columns">
         {% for user in event.users %}
