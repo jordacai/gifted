@@ -110,8 +110,8 @@ def event(event_id):
     user = User.query.get(session['user_id'])
     liability = Transaction.get_user_liability(event.id, user.id)
     progress = get_event_progress(event_id)
-    return render_template('event.html', event=event, progress=progress, logged_in_user=user,
-                           liability=liability, pair=user.pair)
+    giftee = User.query.get(user.pair.giftee_id)
+    return render_template('event.html', event=event, progress=progress, liability=liability, giftee=giftee)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
