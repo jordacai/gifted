@@ -31,7 +31,7 @@ purchases
 
     {% for giftee, transactions in grouped_transactions.items() %}
     <div class="mb-4 border-bottom">
-        <h5 class="font-italic">Your purchases for {{ giftee }}</h5>
+        <h5 class="font-italic">for: {{ giftee }}</h5>
         <div class="card-columns">
             {% for transaction in transactions %}
             <div class="card">

@@ -6,26 +6,24 @@ event
 
 {% block main %}
 <div class="container">
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">{{ event.title }}</h5>
-            <p class="card-text">{{ event.description }}</p>
-            {% if not event.users %}
-            <p>This event has no users...yet!</p>
+    <div class="jumbotron">
+        <h2>{{ event.title }}</h2>
+        <p class="lead">{{ event.description }}</p>
+        {% if not event.users %}
+        <p class="lead">This event has no users...yet!</p>
+        {% else %}
+            {% if not event.pairs %}
+            <p>This event has not been shuffled!</p>
+            <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#shuffleModal">
+                Shuffle gifters
+            </button>
             {% else %}
-                {% if not event.pairs %}
-                <p>This event has not been shuffled!</p>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shuffleModal">
-                    Shuffle gifters
-                </button>
-                {% else %}
-                <p>This event has been shuffled. Reshuffle at your own risk.</p>
-                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#shuffleModal">
-                    Shuffle gifters
-                </button>
-                {% endif %}
+            <p>This event has been shuffled. Reshuffle at your own risk.</p>
+            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#shuffleModal">
+                Shuffle gifters
+            </button>
             {% endif %}
-        </div>
+        {% endif %}
     </div>
 </div>
 {% if event.users %}
@@ -46,7 +44,7 @@ event
                 {% for user in event.users %}
                 <tr>
                     <td>{{ user.username }}</td>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user.get_full_name() }}</td>
                     <td>{{ user.registered_on }}</td>
                     {% if user in event.admins %}
                     <td>True</td>
@@ -61,6 +59,17 @@ event
                     </td>
                     {% endif %}
                 </tr>
+                    {% for child in user.children %}
+                        {% if child.event_id == event.id %}
+                            <tr>
+                                <td>👶</td>
+                                <td>{{ child.get_full_name() }}</td>
+                                <td>{{ child.created_on }}</td>
+                                <td>False</td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
             </tbody>
         </table>
@@ -69,9 +78,9 @@ event
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#existingUserModal">
       Add existing user
     </button>
-<!--    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">-->
-<!--      Add ad-hoc user-->
-<!--    </button>-->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#childModal">
+      Add child
+    </button>
 </div>
 
 <div class="container mb-5">
@@ -166,7 +175,7 @@ event
                 {% else %}
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="shuffledUsers">Select users to add to this event</label>
+                        <label for="users">Select users to add to this event</label>
                     </div>
                     <div class="form-group">
                         <select multiple class="form-control form-control-lg" id="users" name="users">
@@ -185,25 +194,26 @@ event
         </div>
     </div>
 </div>
-<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+<div class="modal fade" id="childModal" tabindex="-1" role="dialog" aria-labelledby="childModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="userModalLabel">Add a user</h5>
+                <h5 class="modal-title" id="childModalLabel">Add a child to a user</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="/admin/events/{{ event.id }}/users" method="post">
+            <form action="/admin/add-user-child" method="post">
                 <div class="modal-body">
                     <div class="form-group">
-                        <input class="form-control" name="username" placeholder="username (email)" type="text" autocomplete="off" autofocus>
+                        <label for="parent">Select a parent</label>
                     </div>
                     <div class="form-group">
-                        <input class="form-control" name="password" placeholder="password" type="password" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control" name="passwordConfirm" placeholder="confirm your password" type="password" autocomplete="off">
+                        <select multiple class="form-control form-control-lg" id="parent" name="parent">
+                            {% for user in event.users %}
+                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <input class="form-control" name="firstName" placeholder="first name" type="text">
@@ -211,6 +221,7 @@ event
                     <div class="form-group">
                         <input class="form-control" name="lastName" placeholder="last name" type="text">
                     </div>
+                    <input hidden name="eventId" value="{{ event.id }}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
