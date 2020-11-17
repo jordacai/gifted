@@ -40,7 +40,6 @@ def login():
             session['user_id'] = user.id
             session['username'] = request.form.get('username')
             session['is_admin'] = len(user.administration) > 0 or user.is_admin
-            flash('Logged in successfully', 'success')
             return redirect(url_for('main.index'))
         else:
             flash('Invalid password!', 'warning')

@@ -4,9 +4,19 @@
 admin
 {% endblock %}
 
+{% block top_nav %}
+<div class="navbar">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Admin</li>
+            <li class="breadcrumb-item active" aria-current="page">Events</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block main %}
 <div class="container">
-    <h4>Events</h4>
     {% if not events %}
         <p>No active events</p>
     {% else %}
