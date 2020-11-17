@@ -4,6 +4,16 @@
 home
 {% endblock %}
 
+{% block top_nav %}
+<div class="navbar">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Events</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block main %}
     {% for event in events %}
     <div class="container">
@@ -13,7 +23,7 @@ home
                     <h2 class="card-title">{{ event.title }}</h2>
                     <p class="card-text">{{ event.description }}</p>
                     {% if event.is_active() %}
-                        <h6>Event is active!</h6>
+                        <h6 class="text-success">Event is active!</h6>
                     {% endif %}
                     <a href="/events/{{ event.id }}" class="btn btn-primary">Go to event</a>
                 </div>

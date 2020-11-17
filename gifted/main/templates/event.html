@@ -5,9 +5,14 @@ event
 {% endblock %}
 
 {% block top_nav %}
-<a class="nav-item nav-link" href="/">Events</a>
-<span class="navbar-text">/</span>
-<a class="nav-item nav-link active" href="#">{{ event.title }}</a>
+<div class="navbar">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Events</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
+        </ol>
+    </nav>
+</div>
 {% endblock %}
 
 {% block main %}

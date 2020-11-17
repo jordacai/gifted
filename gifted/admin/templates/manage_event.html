@@ -4,6 +4,18 @@
 event
 {% endblock %}
 
+{% block top_nav %}
+<div class="navbar">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Admin</li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="/admin">Events</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block main %}
 <div class="container">
     <div class="jumbotron">
@@ -198,14 +210,15 @@ event
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="childModalLabel">Add a child to a user</h5>
+                <h5 class="modal-title" id="childModalLabel">Add a child account</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <form action="/admin/add-user-child" method="post">
                 <div class="modal-body">
-                    <div class="form-group">
+                    <p>A child account does not have an active login, and its parent can contribute to its wishlist</p>
+                    <div class="col-xs-4">
                         <label for="parent">Select a parent</label>
                     </div>
                     <div class="form-group">

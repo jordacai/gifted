@@ -16,59 +16,65 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-md navbar-light bg-light border">
-            <a class="navbar-brand" href="/"><span class="blue">🎁 gifted</span></a>
-            <div class="collapse navbar-collapse" id="navbar">
-                <div class="navbar-nav">
-                    {% block top_nav%}{% endblock %}
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="d-flex flex-grow-1">
+                <a class="navbar-brand" href="/"><span class="blue">🎁 gifted</span></a>
+                <div class="w-100 text-right">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapse">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
                 </div>
+            </div>
+            <div class="collapse navbar-collapse flex-grow-1 text-right" id="collapse">
                 {% if session.user_id %}
-                    <ul class="navbar-nav ml-auto mt-2">
-                        {% if session.is_admin %}
-                        <li class="nav-item"><a class="nav-link" href="/admin">admin</a></li>
-                        {% endif %}
-                        <li class="nav-item"><a class="nav-link" href="/logout">logout</a></li>
-                    </ul>
+                <ul class="navbar-nav ml-auto flex-nowrap">
+                    {% if session.is_admin %}
+                    <li class="nav-item"><a class="nav-link" href="/admin">admin</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link" href="/logout">logout</a></li>
+                </ul>
                 {% else %}
-                    <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/register">register</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">login</a></li>
-                    </ul>
+                <ul class="navbar-nav ml-auto flex-nowrap">
+                    <li class="nav-item"><a class="nav-link" href="/register">register</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">login</a></li>
+                </ul>
                 {% endif %}
             </div>
         </nav>
 
-    <!-- conditionally flash warnings and successes in separate groups -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <header>
-            {% for category, message in messages %}
-                {% if category == 'success' %}
-                    <div class="alert alert-success border text-center" role="alert">
-                        {{ message }} <br/>
-                    </div>
-                {% endif %}
-                {% if category == 'warning' %}
-                    <div class="alert alert-danger border text-center" role="alert">
-                        {{ message }} <br/>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </header>
-        {% endif %}
-    {% endwith %}
-        <main class="container mw-75 p-5">
+        <!-- conditionally flash warnings and successes in separate groups -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <header>
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div class="alert alert-success border text-center" role="alert">
+                            {{ message }} <br/>
+                        </div>
+                    {% endif %}
+                    {% if category == 'warning' %}
+                        <div class="alert alert-danger border text-center" role="alert">
+                            {{ message }} <br/>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </header>
+            {% endif %}
+        {% endwith %}
+
+        <main class="container mw-75 p-3">
+            {% block top_nav %}{% endblock %}
             {% block main %}{% endblock %}
             {% block bot_nav %}{% endblock %}
         </main>
 
-        <footer class="bottom font-sm text-sm">
+        <footer class="bottom font-sm text-sm pt-5">
             <div class="container text-center">
                 <ul class="list-unstyled text-muted text-sm" style="font-family: monospace;">
                     <li>Developed by Jordan Caimano</li>
                     <li><a href="https://github.com/jcaimano">@jcaimano</a></li>
                     <li>Want to support the site? Buy me a beer! 🍺</li>
-                    <li>© 2020 Copyright</li>
+                    <li>©2020</li>
                 </ul>
             </div>
         </footer>
