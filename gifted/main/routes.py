@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, url_for, session, current_app
+from flask import Blueprint, render_template, request, flash, url_for, session, current_app, g
 from flask_mail import Message
 from werkzeug import security
+from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
-from gifted import login_required, validate, db, mail
+from gifted import login_required, validate, db, mail, app
 from gifted.helpers import generate_code, group_by
 from gifted.models import User, Invite, Event, Item, Transaction, Reset
 
@@ -14,11 +15,17 @@ main = Blueprint('main', __name__,
                  static_folder='static')
 
 
+@app.before_request
+def load_user():
+    if session.get('user_id') is not None:
+        user = User.query.get(session['user_id'])
+        g.user = user
+
+
 @main.route('/')
 @login_required
 def index():
-    user = User.query.filter_by(id=session['user_id']).first()
-    events = user.events
+    events = g.user.events
     return render_template('index.html', events=events)
 
 
@@ -106,10 +113,12 @@ def register():
 @login_required
 def event(event_id):
     event = Event.query.get(event_id)
-    user = User.query.get(session['user_id'])
-    liability = Transaction.get_user_liability(event.id, user.id)
+    if g.user not in event.users:
+        abort(401)
+
+    liability = Transaction.get_user_liability(event.id, g.user.id)
     progress = get_event_progress(event_id)
-    giftee = User.query.get(user.pair.giftee_id)
+    giftee = User.query.get(g.user.pair.giftee_id)
     return render_template('event.html', event=event, progress=progress, liability=liability, giftee=giftee)
 
 
@@ -132,6 +141,9 @@ def wishlist(event_id, user_id):
 
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
+    if g.user not in event.users:
+        abort(401)
+
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
     progress = get_wishlist_progress(event_id, user_id)
     return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
@@ -141,6 +153,9 @@ def wishlist(event_id, user_id):
 @login_required
 def purchases(event_id, user_id):
     event = Event.query.get(event_id)
+    if g.user not in event.users:
+        abort(401)
+
     transactions = Transaction.query.filter_by(event_id=event_id, gifter_id=user_id).all()
     liability = Transaction.get_user_liability(event_id, user_id)
     grouped_transactions = group_by(transactions, projection=lambda x: x.giftee.get_full_name())

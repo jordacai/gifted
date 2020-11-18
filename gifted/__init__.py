@@ -13,6 +13,7 @@ from gifted.helpers import validate, login_required
 
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

@@ -8,7 +8,7 @@ admin
 <div class="navbar">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">Admin</li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="#">Admin</a></li>
             <li class="breadcrumb-item active" aria-current="page">Events</li>
         </ol>
     </nav>
@@ -21,10 +21,11 @@ admin
         <p>No active events</p>
     {% else %}
     <div class="table-responsive">
-    <table class="table">
+    <table class="table table-borderless">
         <thead class="thead-light">
             <tr>
                 <th scope="col">title</th>
+                <th scope="col">users</th>
                 <th scope="col">starts on</th>
                 <th scope="col">ends on</th>
                 <th scope="col"></th>
@@ -34,6 +35,7 @@ admin
             {% for event in events %}
             <tr>
                 <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
+                <td>{{ event.users | length }}</td>
                 <td>{{ event.starts_on }}</td>
                 <td>{{ event.ends_on }}</td>
                 <td>
