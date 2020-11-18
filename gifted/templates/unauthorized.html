@@ -6,8 +6,8 @@ error
 
 {% block main %}
 <div class="container">
-    <h4>An unexpected error has occurred</h4>
-    <p>Sorry for the inconvenience!</p>
+    <h4 class="mt-5">You are not permitted to access this event</h4>
+    <p class="lead">You must be a participant to see this content</p>
     <hr>
     <p>{{ error }}</p>
     <a href="{{ url_for('main.index') }}">Back</a>

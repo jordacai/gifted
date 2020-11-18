@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, url_for, current_app, session
+from flask import Blueprint, render_template, request, flash, url_for, current_app, session, g
 from flask_mail import Message
+from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
 from gifted import db, mail
@@ -13,16 +14,18 @@ admin = Blueprint('admin', __name__,
                   static_folder='static')
 
 
-@admin.route('/admin')
+@admin.route('/admin/events')
 def index():
-    user = User.query.get(session['user_id'])
-    return render_template('admin.html', events=user.administration)
+    return render_template('admin.html', events=g.user.administration)
 
 
 @admin.route('/admin/events/<event_id>')
 def manage_event(event_id):
     # todo: this is pretty hacky, is there a way to push this onto the db?
     event = Event.query.get(event_id)
+    if g.user not in event.admins:
+        abort(401)
+
     existing_ids = []
     for user in event.users:
         existing_ids.append(user.id)

@@ -6,8 +6,8 @@ error
 
 {% block main %}
 <div class="container">
-    <h4>An unexpected error has occurred</h4>
-    <p>Sorry for the inconvenience!</p>
+    <h4 class="mt-5">That resource was not found</h4>
+    <p class="lead">A page could not be found @ {{ request.path }}</p>
     <hr>
     <p>{{ error }}</p>
     <a href="{{ url_for('main.index') }}">Back</a>
