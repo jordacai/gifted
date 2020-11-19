@@ -5,14 +5,16 @@ event
 {% endblock %}
 
 {% block top_nav %}
-<div class="navbar">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Admin</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Events</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
-        </ol>
-    </nav>
+<div class="container">
+    <div class="navbar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Events</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
+            </ol>
+        </nav>
+    </div>
 </div>
 {% endblock %}
 
@@ -54,6 +56,7 @@ event
             </thead>
             <tbody>
                 {% for user in event.users %}
+                {% if user.parent is none %}
                 <tr>
                     <td>{{ user.username }}</td>
                     <td>{{ user.get_full_name() }}</td>
@@ -70,6 +73,7 @@ event
                         </form>
                     </td>
                     {% endif %}
+                {% endif %}
                 </tr>
                     {% for child in user.children %}
                         {% if child.event_id == event.id %}
@@ -217,7 +221,10 @@ event
             </div>
             <form action="/admin/add-user-child" method="post">
                 <div class="modal-body">
-                    <p>A child account does not have an active login, and its parent can contribute to its wishlist</p>
+                    <ul class="text-left">
+                        <li>Child accounts do not login</li>
+                        <li>The chosen parent will manage the child's wishlist</li>
+                    </ul>
                     <div class="col-xs-4">
                         <label for="parent">Select a parent</label>
                     </div>

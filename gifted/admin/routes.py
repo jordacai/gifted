@@ -1,7 +1,9 @@
+import uuid
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, flash, url_for, current_app, session, g
 from flask_mail import Message
+from werkzeug import security
 from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
@@ -95,7 +97,15 @@ def add_user_child():
     event_id = request.form.get('eventId')
     first_name = request.form.get('firstName')
     last_name = request.form.get('lastName')
+    event = Event.query.get(event_id)
+    user = User(username=str(uuid.uuid4()) + '@gifted.jcaimano.com',
+                password=security.generate_password_hash(str(uuid.uuid4())),
+                parent_id=parent_id,
+                first_name=first_name,
+                last_name=last_name)
     child = Child(parent_id=parent_id, event_id=event_id, first_name=first_name, last_name=last_name)
+    event.users.append(user)
+    db.session.add(user)
     db.session.add(child)
     db.session.commit()
     flash(f'Successfully added {child.get_full_name()} as a child of { child.parent.get_full_name()}!', 'success')

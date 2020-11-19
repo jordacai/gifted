@@ -1,3 +1,15 @@
+main .container {
+    max-width: 720px;
+}
+
+.container .navbar {
+    padding: 0;
+}
+
+body {
+    overflow-y: scroll;
+}
+
 main .form-control
 {
     /* center form controls */
@@ -47,6 +59,11 @@ main tfoot
    max-width: 100%;
 }
 
+.jumbotron {
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+}
+
 /* fixed-width input group labels */
 .input-group>.input-group-prepend {
     flex: 0 0 25%;
@@ -64,12 +81,6 @@ main tfoot
 @media (min-width: 768px) {
     .card-columns {
         column-count: 2;
-    }
-}
-
-@media (min-width: 992px) {
-    .card-columns {
-        column-count: 3;
     }
 }
 
