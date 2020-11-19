@@ -8,7 +8,7 @@ from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail, app
 from gifted.helpers import generate_code, group_by
-from gifted.models import User, Invite, Event, Item, Transaction, Reset
+from gifted.models import User, Invite, Event, Item, Transaction, Reset, Child
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -147,6 +147,16 @@ def wishlist(event_id, user_id):
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
     progress = get_wishlist_progress(event_id, user_id)
     return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
+
+
+# @main.route('/events/<event_id>/wishlists/<user_id>/children')
+# def wishlist(event_id, user_id):
+#     event = Event.query.get(event_id)
+#     user = User.query.get(user_id)
+#     if g.user not in event.users:
+#         abort(401)
+
+
 
 
 @main.route('/events/<event_id>/purchases/<user_id>')

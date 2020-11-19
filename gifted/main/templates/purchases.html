@@ -5,15 +5,18 @@ purchases
 {% endblock %}
 
 {% block top_nav %}
-<div class="navbar">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Events</a></li>
-            <li class="breadcrumb-item"><a href="/events/{{ event.id }}">{{ event.title }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">My purchases</li>
-        </ol>
-    </nav>
+<div class="container">
+    <div class="navbar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Events</a></li>
+                <li class="breadcrumb-item"><a href="/events/{{ event.id }}">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My purchases</li>
+            </ol>
+        </nav>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block main %}

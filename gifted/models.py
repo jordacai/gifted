@@ -41,6 +41,7 @@ class Reset(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     registrar_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(240), nullable=False)
@@ -50,6 +51,7 @@ class User(db.Model):
     is_admin = db.Column(db.Integer, default=0)
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
+    parent = db.relationship('User', remote_side=id, foreign_keys=[parent_id])
     children = db.relationship('Child', backref='parent', lazy=True)
 
     def __repr__(self):
@@ -68,7 +70,7 @@ class Child(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.now())
 
     def __repr__(self):
-        return '<Child id=%r, parent_id=%r, event_id=%r name=%r>' % \
+        return '<Child id=%r, parent_id=%r, event_id=%r, name=%r>' % \
                (self.id, self.parent_id, self.event_id, self.get_full_name())
 
     def get_full_name(self):
@@ -144,6 +146,7 @@ class Event(db.Model):
                              secondary=event_admin,
                              backref=db.backref('administration', lazy=True),
                              lazy=True)
+    children = db.relationship('Child', backref='event', foreign_keys=[Child.event_id])
     pairs = db.relationship('Pair', backref='event', lazy=True)
     invites = db.relationship('Invite', backref='event', lazy=True)
 

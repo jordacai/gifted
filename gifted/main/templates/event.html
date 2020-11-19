@@ -5,13 +5,15 @@ event
 {% endblock %}
 
 {% block top_nav %}
-<div class="navbar">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Events</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
-        </ol>
-    </nav>
+<div class="container">
+    <div class="navbar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Events</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
+            </ol>
+        </nav>
+    </div>
 </div>
 {% endblock %}
 
@@ -20,21 +22,26 @@ event
     <div class="jumbotron">
         <h2>{{ event.title }}</h2>
         <p class="lead">{{ event.description }}</p>
-        <a class="btn btn-primary" href="/events/{{ event.id }}/wishlists/{{ session['user_id'] }}" role="button">
+        <a class="btn btn-primary" href="/events/{{ event.id }}/wishlists/{{ g.user.id }}" role="button">
             View my wishlist
         </a>
         <hr class="my-3">
-        {% if event.users|length < 2 %}
-        <p class="lead">It's quiet in here...</p>
-        {% elif liability == 0 %}
-        <p class="lead">Start purchasing!</p>
-        {% else %}
-        <p class="lead">You are on the hook for <strong>${{ liability }}</strong></p>
-        <a href="/events/{{ event.id }}/purchases/{{ session['user_id'] }}">Manage my purchases</a>
-        {% endif %}
+        <ul class="list-unstyled">
+            {% if event.users|length < 2 %}
+            <li class="lead">It's quiet in here...<li>
+            {% elif liability == 0 %}
+            <li class="lead">Start purchasing!</li>
+            {% else %}
+            <li class="lead">You are on the hook for <strong>${{ liability }}</strong></li>
+            <li><a href="/events/{{ event.id }}/purchases/{{ g.user.id }}">Manage my purchases</a></li>
+            {% endif %}
+            {% if g.user.children | length > 0 %}
+            <li><a href="/events/{{ event.id }}/wishlists/{{ g.user.id }}/children">Manage my children</a></li>
+            {% endif %}
+        </ul>
     </div>
 
-    <div class="card-colums mb-4">
+    <div class="mb-4">
         <div class="card border-primary mx-auto">
             <div class="card-header"><strong>This is your person!</strong></div>
             <div class="card-body">
@@ -60,10 +67,10 @@ event
 
     <div class="card-columns">
         {% for user in event.users %}
-        {% if user.id != session['user_id'] and user != giftee %}
+        {% if user.id != g.user.id and user != giftee %}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">{{ user.get_full_name() }}</h5>
+                <h5 class="card-title">{{ user.get_full_name() }} {% if user.parent is not none %}(👶){% endif %}</h5>
                 {% if progress.get(user.id).percent == '100.00' %}
                     <p>wishlist is complete!</p>
                 {% elif progress.get(user.id) is none %}
@@ -78,8 +85,11 @@ event
                              aria-valuemax="100">
                         </div>
                     </div>
-                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View
-                        wishlist</a>
+                    {% if user.parent  == g.user %}
+                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-warning">Manage wishlist</a>
+                    {% else %}
+                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View wishlist</a>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
