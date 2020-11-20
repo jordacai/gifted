@@ -38,8 +38,8 @@ admin
             <tr>
                 <td><a href="/admin/events/{{ event.id }}">{{ event.title }}</a></td>
                 <td>{{ event.users | length }}</td>
-                <td>{{ event.starts_on }}</td>
-                <td>{{ event.ends_on }}</td>
+                <td>{{ pretty_date(event.starts_on) }}</td>
+                <td>{{ pretty_date(event.ends_on) }}</td>
                 <td>
                     <form action="/admin/events/{{ event.id }}/delete" method="post">
                         <button class="btn btn-danger btn-sm" type="submit">delete</button>

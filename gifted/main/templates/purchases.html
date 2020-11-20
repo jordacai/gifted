@@ -53,7 +53,9 @@ purchases
                             Unclaim
                         </button>
                     </form>
-                    <p class="card-text"><small class="text-muted">Claimed @ {{ transaction.transacted_on }}</small></p>
+                    <p class="card-text">
+                        <small class="text-muted">Claimed on {{ pretty_datetime(transaction.transacted_on) }}</small>
+                    </p>
                 </div>
             </div>
             {% endfor %}
