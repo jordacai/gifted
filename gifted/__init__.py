@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import date
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
@@ -52,13 +53,13 @@ def template_function(func):
 
 
 @template_function
-def pretty_date(date):
-    return date.strftime('%x')
+def pretty_date(d):
+    return d.strftime('%x') if isinstance(d, date) else d
 
 
 @template_function
-def pretty_datetime(date):
-    return date.strftime('%c')
+def pretty_datetime(d):
+    return d.strftime('%c') if isinstance(d, date) else d
 
 
 @app.shell_context_processor
