@@ -46,6 +46,21 @@ if not app.debug:
     app.logger.info('Gifted startup')
 
 
+def template_function(func):
+    app.jinja_env.globals[func.__name__] = func
+    return func
+
+
+@template_function
+def pretty_date(date):
+    return date.strftime('%x')
+
+
+@template_function
+def pretty_datetime(date):
+    return date.strftime('%c')
+
+
 @app.shell_context_processor
 def make_shell_context():
     return {

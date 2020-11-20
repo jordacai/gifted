@@ -1,1 +1,1 @@
-web: flask db init; flask db migrate; flask db upgrade; flask translate compile; gunicorn gifted:app
+web: flask db init; flask db stamp head; flask db migrate; flask db upgrade; flask translate compile; gunicorn gifted:app

@@ -18,6 +18,7 @@ home
 
 {% block main %}
     {% for event in events %}
+    {% if event.is_active() %}
     <div class="container">
         <div class="card-deck">
             <div class="card mb-3">
@@ -31,13 +32,28 @@ home
                 </div>
                 <div class="card-footer text-muted">
                     {% if event.is_expired() %}
-                        Event ended on {{ event.ends_on }}
+                        Event ended on {{ pretty_datetime(event.ends_on) }}
                     {% else %}
-                        Event ends on {{ event.ends_on }}
+                        Event ends on {{ pretty_datetime(event.ends_on) }}
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="container">
+        <div class="card-deck">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title">{{ event.title }}</h2>
+                    <p class="card-text">{{ event.description }}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    Event ended on {{ pretty_datetime(event.ends_on) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     {% endfor %}
 {% endblock %}
