@@ -82,13 +82,31 @@ wishlist
             {% endif %}
         {% endif %}
 
+        <ul class="list-group mb-3">
+            <li class="list-group-item list-group-item-success">Green outlines are high priority</li>
+            <li class="list-group-item list-group-item-warning">Yellow outlines are medium priority</li>
+            <li class="list-group-item list-group-item-danger">Red outlines are low priority</li>
+        </ul>
+
         <div class="card-columns">
             {% for item in wishlist %}
+            {% if item.priority == 'low' %}
+            <div class="card border-danger">
+            {% elif item.priority == 'medium' %}
+            <div class="card border-warning">
+            {% elif item.priority == 'high' %}
+            <div class="card border-success">
+            {% else %}
             <div class="card">
+            {% endif %}
                 <div class="card-header text-left">
                     {{ item.description }}
                 </div>
                 <div class="card-body">
+                    {% if is_amazon_domain(item.location) and amazon_image_location(item.location) %}
+                    <img class="img-fluid mb-3" src="{{ amazon_image_location(item.location) }}"
+                         alt="">
+                    {% endif %}
                     <h5 class="card-subtitle mb-2">${{ item.price }}</h5>
                     {% if item.location %}
                     <p class="mb-2">
@@ -97,19 +115,19 @@ wishlist
                         </a>
                     </p>
                     {% endif %}
-                    {% if item.user_id == session['user_id'] %}
+                    {% if item.user_id == g.user.id or user.parent_id == g.user.id %}
                     <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
                         <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit">
+                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
                             Remove
                         </button>
                     </form>
                     {% elif item.transaction is not none %}
-                        {% if item.transaction.gifter_id == session['user_id'] %}
+                        {% if item.transaction.gifter_id == g.user.id %}
                         <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
                             <input type="hidden" id="transaction_id" name="transaction_id"
                                    value="{{ item.transaction.id }}">
-                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmUnclaim()">
                                 Unclaim
                             </button>
                         </form>
@@ -150,8 +168,8 @@ wishlist
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="question">description</span>
                             </div>
-                            <input name="description" type="text" class="form-control" placeholder="what would you like?"
-                                   autocomplete="off" aria-label="question">
+                            <input name="description" type="text" class="form-control"
+                                   placeholder="what would you like?" autocomplete="off" aria-label="question" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -169,7 +187,7 @@ wishlist
                                 <span class="input-group-text" id="pre-price">price ($)</span>
                             </div>
                             <input name="price" type="number" min="0.01" step="0.01" class="form-control"
-                                   placeholder="how much is it?" aria-describedby="pre-price">
+                                   placeholder="how much is it?" aria-describedby="pre-price" required>
                         </div>
                     </div>
                     <div class="form-group">

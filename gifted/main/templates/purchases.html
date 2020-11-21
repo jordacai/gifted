@@ -37,13 +37,13 @@ purchases
     </div>
 
     {% for giftee, transactions in grouped_transactions.items() %}
-    <div class="mb-4 border-bottom">
+    <div>
         <div class="card-columns">
             {% for transaction in transactions %}
             <div class="card">
                 <div class="card-header">
-                    <p>{{ transaction.item.description }}</p>
-                    <p class="card-subtitle text-muted">for {{ giftee }}</p>
+                    <p class="text-left">{{ transaction.item.description }}</p>
+                    <p class="card-subtitle text-muted text-right font-italic">for {{ giftee }}</p>
                 </div>
                 <div class="card-body">
                     <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>
@@ -60,6 +60,7 @@ purchases
             </div>
             {% endfor %}
         </div>
+        <hr class="my-4">
     </div>
     {% endfor %}
 </div>

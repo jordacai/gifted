@@ -71,6 +71,18 @@ event
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{ user.get_full_name() }} {% if user.parent is not none %}(👶){% endif %}</h5>
+                <!-- do not allow parents to see their child's progress! -->
+                {% if user.parent == g.user %}
+                    <p>wishlist progress is a secret!</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                             style="width: 0%"
+                             aria-valuenow="0" aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-warning">Manage wishlist</a>
+                {% else %}
                 {% if progress.get(user.id).percent == '100.00' %}
                     <p>wishlist is complete!</p>
                 {% elif progress.get(user.id) is none %}
@@ -85,11 +97,8 @@ event
                              aria-valuemax="100">
                         </div>
                     </div>
-                    {% if user.parent  == g.user %}
-                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-warning">Manage wishlist</a>
-                    {% else %}
                     <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View wishlist</a>
-                    {% endif %}
+                {% endif %}
                 </div>
             </div>
         {% endif %}

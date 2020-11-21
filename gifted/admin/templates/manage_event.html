@@ -61,10 +61,7 @@ event
                     <td>{{ user.username }}</td>
                     <td>{{ user.get_full_name() }}</td>
                     <td>{{ pretty_date(user.registered_on) }}</td>
-                    {% if user in event.admins %}
-                    <td>True</td>
-                    {% else %}
-                    <td>False</td>
+                    <td>{% if user in event.admins %}True{% else %}False</td>
                     <td>
                         <form action="/admin/remove-user" method="post">
                             <input hidden name="eventId" value="{{ event.id }}">
@@ -78,9 +75,9 @@ event
                     {% for child in user.children %}
                         {% if child.event_id == event.id %}
                             <tr>
-                                <td>👶</td>
+                                <td class="text-center">👶</td>
                                 <td>{{ child.get_full_name() }}</td>
-                                <td>{{ child.created_on }}</td>
+                                <td>{{ pretty_date(child.created_on) }}</td>
                                 <td>False</td>
                                 <td></td>
                             </tr>
@@ -121,7 +118,7 @@ event
                     <td>{{ invite.code }}</td>
                     <td>{{ invite.is_admin | pretty_boolean }}</td>
                     <td>{{ invite.is_used  | pretty_boolean }}</td>
-                    <td>{{ invite.expires_on }}</td>
+                    <td>{{ pretty_date(invite.expires_on) }}</td>
                     <td>
                         <form action="/admin/invites/{{ invite.id }}/revoke" method="post">
                             <button class="btn btn-danger btn-sm" type="submit">revoke</button>
