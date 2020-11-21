@@ -28,27 +28,28 @@ wishlist
         <!-- This is for the currently logged in user, do not render progress! -->
         {% if user.id == g.user.id %}
         <h2>My Wishlist</h2>
-        {% if wishlist|length == 0 %}
-        <p class="lead">
-            Start your wishlist so gifters can begin gifting!
-        </p>
-        {% else %}
-        <p class="lead">Your wishlist total is ${{ progress.total }}</p>
-        {% endif %}
+            {% if wishlist|length == 0 %}
+            <p class="lead">
+                Start your wishlist so gifters can begin gifting!
+            </p>
+            {% else %}
+            <p class="lead">Your wishlist total is ${{ progress.total }}</p>
+            {% endif %}
         <div>
             <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
                 Add to wishlist
             </button>
         </div>
+        <!-- This is a parent's child, treat it like their own wishlist! -->
         {% elif user.parent == g.user %}
         <h2>{{ user.first_name }}'s Wishlist</h2>
-        {% if wishlist|length == 0 %}
-        <p class="lead">
-            Start your child's wishlist so gifters can begin gifting!
-        </p>
-        {% else %}
-        <p class="lead">Your child's wishlist total is ${{ progress.total }}</p>
-        {% endif %}
+            {% if wishlist|length == 0 %}
+            <p class="lead">
+                Start your child's wishlist so gifters can begin gifting!
+            </p>
+            {% else %}
+            <p class="lead">Your child's wishlist total is ${{ progress.total }}</p>
+            {% endif %}
         <div>
             <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
                 Add to wishlist

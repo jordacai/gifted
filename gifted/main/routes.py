@@ -157,8 +157,6 @@ def wishlist(event_id, user_id):
 #         abort(401)
 
 
-
-
 @main.route('/events/<event_id>/purchases/<user_id>')
 @login_required
 def purchases(event_id, user_id):
