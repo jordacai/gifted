@@ -1,7 +1,9 @@
 import logging
 import os
+import re
 from datetime import date
 from logging.handlers import RotatingFileHandler
+from urllib.parse import urlparse
 
 from flask import Flask
 from flask_mail import Mail
@@ -60,6 +62,27 @@ def pretty_date(d):
 @template_function
 def pretty_datetime(d):
     return d.strftime('%c') if isinstance(d, date) else d
+
+
+@template_function
+def is_amazon_domain(s):
+    url = urlparse(s)
+    return True if url is not None and url.hostname == 'www.amazon.com' else False
+
+
+@template_function
+def amazon_image_location(url):
+    img_url = 'https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US' \
+              '&ASIN={}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=SL150'
+    asin_dp = re.search(r'(?<=dp/)[A-Z0-9]{10}', url)
+    asin_gp = re.search(r'(?<=gp/product/)[A-Z0-9]{10}', url)
+
+    if asin_dp:
+        return img_url.format(asin_dp.group(0))
+    elif asin_gp:
+        return img_url.format(asin_gp.group(0))
+    else:
+        return None
 
 
 @app.shell_context_processor

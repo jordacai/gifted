@@ -47,8 +47,12 @@ main tfoot
     font-weight: bold;
 }
 
+.table th {
+    text-align: left;
+}
+
 .table td {
-    max-width: 200px;
+    text-align: left;
 }
 
 .table td span {
