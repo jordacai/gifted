@@ -68,6 +68,18 @@ main tfoot
     padding-bottom: 1rem;
 }
 
+.border-success {
+    border-width:2px !important;
+}
+
+.border-warning {
+    border-width:2px !important;
+}
+
+.border-danger {
+    border-width:2px !important;
+}
+
 /* fixed-width input group labels */
 .input-group>.input-group-prepend {
     flex: 0 0 25%;

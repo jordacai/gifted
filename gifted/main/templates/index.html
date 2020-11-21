@@ -25,9 +25,7 @@ home
                 <div class="card-body">
                     <h2 class="card-title">{{ event.title }}</h2>
                     <p class="card-text">{{ event.description }}</p>
-                    {% if event.is_active() %}
-                        <h6 class="text-success">Event is active!</h6>
-                    {% endif %}
+                    <h6 class="text-success">Event is active!</h6>
                     <a href="/events/{{ event.id }}" class="btn btn-primary">Go to event</a>
                 </div>
                 <div class="card-footer text-muted">
@@ -47,6 +45,9 @@ home
                 <div class="card-body">
                     <h2 class="card-title">{{ event.title }}</h2>
                     <p class="card-text">{{ event.description }}</p>
+                    {% if g.user in event.admins %}
+                    <a href="/events/{{ event.id }}" class="btn btn-secondary">Go to event (archived)</a>
+                    {% endif %}
                 </div>
                 <div class="card-footer text-muted">
                     Event ended on {{ pretty_datetime(event.ends_on) }}
