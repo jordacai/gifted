@@ -15,7 +15,6 @@ from flask_talisman import Talisman
 from config import Config
 from gifted.helpers import validate, login_required
 
-
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object(Config)
@@ -27,6 +26,7 @@ Talisman(app, content_security_policy=None)
 from gifted import models, errors
 from .admin.routes import admin
 from .main.routes import main
+
 app.register_blueprint(admin)
 app.register_blueprint(main)
 
@@ -70,13 +70,17 @@ def get_image_url_from_metadata(url):
     if is_amazon_domain(url):
         return get_amazon_image_url(url)
     else:
-        page = metadata_parser.MetadataParser(url=url, search_head_only=False)
-        return page.get_metadata_link('image')
+        try:
+            page = metadata_parser.MetadataParser(url=url, search_head_only=False)
+            return page.get_metadata_link('image')
+        except Exception as e:
+            app.logger.warn(f'Could not fetch image metadata from {url}. {e}')
+            return None
 
 
 def is_amazon_domain(s):
     url = urlparse(s)
-    return True if url is not None and url.hostname == 'www.amazon.com' else False
+    return True if url is not None and url.hostname == 'amazon.com' else False
 
 
 def get_amazon_image_url(url):
