@@ -14,6 +14,10 @@ event_admin = db.Table('event_admin',
                        db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
                        db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
+event_child = db.Table('event_child',
+                       db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+                       db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
+
 
 class Pair(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
@@ -52,26 +56,9 @@ class User(db.Model):
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
     parent = db.relationship('User', remote_side=id, foreign_keys=[parent_id])
-    children = db.relationship('Child', backref='parent', lazy=True)
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.get_full_name())
-
-    def get_full_name(self):
-        return f'{self.first_name} {self.last_name}'
-
-
-class Child(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    first_name = db.Column(db.String(80), nullable=False)
-    last_name = db.Column(db.String(80), nullable=False)
-    created_on = db.Column(db.DateTime(), default=datetime.now())
-
-    def __repr__(self):
-        return '<Child id=%r, parent_id=%r, event_id=%r, name=%r>' % \
-               (self.id, self.parent_id, self.event_id, self.get_full_name())
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -146,7 +133,10 @@ class Event(db.Model):
                              secondary=event_admin,
                              backref=db.backref('administration', lazy=True),
                              lazy=True)
-    children = db.relationship('Child', backref='event', foreign_keys=[Child.event_id])
+    children = db.relationship('User',
+                               secondary=event_child,
+                               backref=db.backref('children', lazy=True),
+                               lazy=True)
     pairs = db.relationship('Pair', backref='event', lazy=True)
     invites = db.relationship('Invite', backref='event', lazy=True)
 

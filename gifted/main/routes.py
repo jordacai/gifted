@@ -8,7 +8,7 @@ from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail, app
 from gifted.helpers import generate_code, group_by
-from gifted.models import User, Invite, Event, Item, Transaction, Reset, Child
+from gifted.models import User, Invite, Event, Item, Transaction, Reset
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -47,6 +47,7 @@ def login():
             session['user_id'] = user.id
             session['username'] = request.form.get('username')
             session['is_admin'] = len(user.administration) > 0 or user.is_admin
+            app.logger.info(f'{user.username} logged in')
             return redirect(url_for('main.index'))
         else:
             flash('Invalid password!', 'warning')
@@ -149,12 +150,12 @@ def wishlist(event_id, user_id):
     return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
 
 
-# @main.route('/events/<event_id>/wishlists/<user_id>/children')
-# def wishlist(event_id, user_id):
-#     event = Event.query.get(event_id)
-#     user = User.query.get(user_id)
-#     if g.user not in event.users:
-#         abort(401)
+@main.route('/events/<event_id>/wishlists/<user_id>/children')
+def children(event_id, user_id):
+    event = Event.query.get(event_id)
+    if g.user not in event.users and g.user.id != user_id:
+        abort(401)
+    return render_template('children.html', event=event)
 
 
 @main.route('/events/<event_id>/purchases/<user_id>')
