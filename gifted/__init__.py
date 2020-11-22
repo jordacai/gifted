@@ -80,7 +80,7 @@ def get_image_url_from_metadata(url):
 
 def is_amazon_domain(s):
     url = urlparse(s)
-    return True if url is not None and url.hostname == 'amazon.com' else False
+    return True if url is not None and url.hostname == 'www.amazon.com' else False
 
 
 def get_amazon_image_url(url):
