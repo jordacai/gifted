@@ -71,10 +71,10 @@ def get_image_url_from_metadata(url):
         return get_amazon_image_url(url)
     else:
         try:
-            page = metadata_parser.MetadataParser(url=url, search_head_only=False)
+            page = metadata_parser.MetadataParser(url=url, search_head_only=True)
             return page.get_metadata_link('image')
         except Exception as e:
-            app.logger.warn(f'Could not fetch image metadata from {url}. {e}')
+            app.logger.warn(f'Could not fetch image metadata from {urlparse(url).hostname}. {e}')
             return None
 
 
