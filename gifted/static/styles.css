@@ -36,12 +36,6 @@ main
     min-height: 100%;
 }
 
-main img
-{
-    /* constrain images on small screens */
-    max-width: 100%;
-}
-
 main tfoot
 {
     font-weight: bold;

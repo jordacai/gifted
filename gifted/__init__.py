@@ -5,6 +5,7 @@ from datetime import date
 from logging.handlers import RotatingFileHandler
 from urllib.parse import urlparse
 
+import metadata_parser
 from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -65,13 +66,20 @@ def pretty_datetime(d):
 
 
 @template_function
+def get_image_url_from_metadata(url):
+    if is_amazon_domain(url):
+        return get_amazon_image_url(url)
+    else:
+        page = metadata_parser.MetadataParser(url=url, search_head_only=False)
+        return page.get_metadata_link('image')
+
+
 def is_amazon_domain(s):
     url = urlparse(s)
     return True if url is not None and url.hostname == 'www.amazon.com' else False
 
 
-@template_function
-def amazon_image_location(url):
+def get_amazon_image_url(url):
     img_url = 'https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US' \
               '&ASIN={}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=SL150'
     asin_dp = re.search(r'(?<=dp/)[A-Z0-9]{10}', url)

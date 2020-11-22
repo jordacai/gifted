@@ -9,7 +9,7 @@ from werkzeug.utils import redirect
 
 from gifted import db, mail
 from gifted.helpers import generate_code
-from gifted.models import Invite, Event, User, Child
+from gifted.models import Invite, Event, User
 
 admin = Blueprint('admin', __name__,
                   template_folder='templates',
@@ -34,7 +34,7 @@ def manage_event(event_id):
 
     available_users = User.query\
         .filter(User.id.notin_(existing_ids))\
-        .filter(User.registrar_id == session['user_id'])\
+        .filter(User.registrar_id == g.user.id)\
         .all()
 
     return render_template('manage_event.html', event=event, available_users=available_users)
@@ -86,6 +86,8 @@ def add_users(event_id):
     for user_id in users:
         user = User.query.get(user_id)
         event.users.append(user)
+        if user.parent:
+            event.children.append(user)
         db.session.commit()
 
     return redirect(url_for('admin.manage_event', event_id=event_id))
@@ -98,14 +100,15 @@ def add_user_child():
     first_name = request.form.get('firstName')
     last_name = request.form.get('lastName')
     event = Event.query.get(event_id)
-    user = User(username=str(uuid.uuid4()) + '@gifted.jcaimano.com',
-                password=security.generate_password_hash(str(uuid.uuid4())),
-                parent_id=parent_id,
-                first_name=first_name,
-                last_name=last_name)
-    child = Child(parent_id=parent_id, event_id=event_id, first_name=first_name, last_name=last_name)
-    event.users.append(user)
-    db.session.add(user)
+    child = User(username=str(uuid.uuid4()) + '@gifted.jcaimano.com',
+                 password=security.generate_password_hash(str(uuid.uuid4())),
+                 parent_id=parent_id,
+                 registrar_id=parent_id,
+                 first_name=first_name,
+                 last_name=last_name)
+
+    event.users.append(child)
+    event.children.append(child)
     db.session.add(child)
     db.session.commit()
     flash(f'Successfully added {child.get_full_name()} as a child of { child.parent.get_full_name()}!', 'success')

@@ -35,9 +35,7 @@ event
             <li class="lead">You are on the hook for <strong>${{ liability }}</strong></li>
             <li><a href="/events/{{ event.id }}/purchases/{{ g.user.id }}">Manage my purchases</a></li>
             {% endif %}
-            {% if g.user.children | length > 0 %}
             <li><a href="/events/{{ event.id }}/wishlists/{{ g.user.id }}/children">Manage my children</a></li>
-            {% endif %}
         </ul>
     </div>
 
@@ -70,7 +68,7 @@ event
         {% if user.id != g.user.id and user != giftee %}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">{{ user.get_full_name() }} {% if user.parent is not none %}(👶){% endif %}</h5>
+                <h5 class="card-title">{{ user.get_full_name() }} {% if user.parent is not none %}👶{% endif %}</h5>
                 <!-- do not allow parents to see their child's progress! -->
                 {% if user.parent == g.user %}
                     <p>wishlist progress is a secret!</p>

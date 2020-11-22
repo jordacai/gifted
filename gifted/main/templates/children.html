@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+children
+{% endblock %}
+
+{% block top_nav %}
+<div class="container">
+    <div class="navbar">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Events</a></li>
+                <li class="breadcrumb-item"><a href="/events/{{ event.id }}">{{ event.title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My children</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="jumbotron">
+        <h2>My children</h2>
+        <p class="lead">It is up to you to manage your children's wishlists! They do not have an active login.</p>
+    </div>
+
+    <div class="card-columns mb-4">
+        {% for child in event.children %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ child.get_full_name() }} 👶</h5>
+                <!-- do not allow parents to see their child's progress! -->
+                <p>wishlist progress is a secret!</p>
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                         style="width: 0%"
+                         aria-valuenow="0" aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <a href="/events/{{ event.id }}/wishlists/{{ child.id }}" class="btn btn-warning">Manage wishlist</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block bot_nav %}
+<div class="container">
+    <a href="/"><span>back to events</span></a>
+</div>
+{% endblock %}

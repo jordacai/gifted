@@ -12,7 +12,7 @@ wishlist
                 <li class="breadcrumb-item"><a href="/">Events</a></li>
                 <li class="breadcrumb-item"><a href="/events/{{ event.id }}">{{ event.title }}</a></li>
                 {% if user.id == g.user.id %}
-                <li class="breadcrumb-item active" aria-current="page">Me</li>
+                <li class="breadcrumb-item active" aria-current="page">My wishlist</li>
                 {% else %}
                 <li class="breadcrumb-item active" aria-current="page">{{ user.first_name }}</li>
                 {% endif %}
@@ -27,7 +27,7 @@ wishlist
     <div class="jumbotron">
         <!-- This is for the currently logged in user, do not render progress! -->
         {% if user.id == g.user.id %}
-        <h2>My Wishlist</h2>
+        <h2>My wishlist</h2>
             {% if wishlist|length == 0 %}
             <p class="lead">
                 Start your wishlist so gifters can begin gifting!
@@ -65,7 +65,7 @@ wishlist
             {% else %}
                 {% if progress.percent == '0.00' %}
                 <p class="lead">
-                    Get this thing started, people! 🙄
+                    Start claiming items, people! 🙄
                 </p>
                 {% elif progress.percent == '100.00' %}
                 <p class="lead">
@@ -76,27 +76,29 @@ wishlist
                     Gifters have claimed <strong>${{ progress.purchased }}</strong> <br>
                     of the <strong>${{ progress.total }}</strong> total that {{ user.first_name }} requested.
                 </p>
-                <div class="progress bg-white mb-5">
+                <div class="progress bg-white mb-3">
                     <div class="progress-bar progress-bar-striped bg-success" style="width: {{ progress.percent }}%;"></div>
                 </div>
                 {% endif %}
             {% endif %}
         {% endif %}
 
-        <ul class="list-group mb-3">
-            <li class="list-group-item list-group-item-success">Green outlines are high priority</li>
-            <li class="list-group-item list-group-item-warning">Yellow outlines are medium priority</li>
-            <li class="list-group-item list-group-item-danger">Red outlines are low priority</li>
-        </ul>
+        <div class="mx-auto">
+            <ul class="list-group mb-3">
+                <li class="list-group-item list-group-item-danger">Red is high priority</li>
+                <li class="list-group-item list-group-item-warning">Yellow is medium priority</li>
+                <li class="list-group-item list-group-item-success">Green is low priority</li>
+            </ul>
+        </div>
 
         <div class="card-columns">
             {% for item in wishlist %}
             {% if item.priority == 'low' %}
-            <div class="card border-danger">
+            <div class="card border-success">
             {% elif item.priority == 'medium' %}
             <div class="card border-warning">
             {% elif item.priority == 'high' %}
-            <div class="card border-success">
+            <div class="card border-danger">
             {% else %}
             <div class="card">
             {% endif %}
@@ -104,9 +106,11 @@ wishlist
                     {{ item.description }}
                 </div>
                 <div class="card-body">
-                    {% if is_amazon_domain(item.location) and amazon_image_location(item.location) %}
-                    <img class="img-fluid mb-3" src="{{ amazon_image_location(item.location) }}"
-                         alt="">
+                    {% set img_url = get_image_url_from_metadata(item.location) %}
+                    {% if img_url is not none %}
+                    <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
+                        <img class="img-fluid mb-3" src="{{ img_url }}" alt="">
+                    </a>
                     {% endif %}
                     <h5 class="card-subtitle mb-2">${{ item.price }}</h5>
                     {% if item.location %}

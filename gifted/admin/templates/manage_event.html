@@ -72,16 +72,16 @@ event
                     {% endif %}
                 {% endif %}
                 </tr>
-                    {% for child in user.children %}
-                        {% if child.event_id == event.id %}
-                            <tr>
-                                <td class="text-center">👶</td>
-                                <td>{{ child.get_full_name() }}</td>
-                                <td>{{ pretty_date(child.created_on) }}</td>
-                                <td>False</td>
-                                <td></td>
-                            </tr>
-                        {% endif %}
+                    {% for child in event.children %}
+                    {% if child.parent_id == user.id %}
+                    <tr>
+                        <td class="text-center">👶</td>
+                        <td>{{ child.get_full_name() }}</td>
+                        <td>{{ pretty_date(child.created_on) }}</td>
+                        <td>False</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 {% endfor %}
             </tbody>
@@ -183,7 +183,7 @@ event
                     <p>All existing users already belong to this event!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-dismiss="modal">Okay</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal">Ok</button>
                 </div>
                 {% else %}
                 <div class="modal-body">
@@ -193,7 +193,9 @@ event
                     <div class="form-group">
                         <select multiple class="form-control form-control-lg" id="users" name="users">
                             {% for user in available_users %}
-                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                <option value="{{ user.id }}">
+                                    {{ user.first_name }} {{ user.last_name }} {% if user.parent %}👶{% endif %}
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -228,7 +230,9 @@ event
                     <div class="form-group">
                         <select multiple class="form-control form-control-lg" id="parent" name="parent">
                             {% for user in event.users %}
+                                {% if user.parent is none %}
                                 <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>
