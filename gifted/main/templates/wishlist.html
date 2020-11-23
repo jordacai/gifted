@@ -90,69 +90,74 @@ wishlist
                 <li class="list-group-item list-group-item-success">Green is low priority</li>
             </ul>
         </div>
+    </div>
 
-        <div class="card-columns">
-            {% for item in wishlist %}
-            {% if item.priority == 'low' %}
-            <div class="card border-success">
-            {% elif item.priority == 'medium' %}
-            <div class="card border-warning">
-            {% elif item.priority == 'high' %}
-            <div class="card border-danger">
-            {% else %}
-            <div class="card">
-            {% endif %}
-                <div class="card-header text-left">
-                    {{ item.description }}
-                </div>
-                <div class="card-body">
-                    {% set img_url = get_image_url_from_metadata(item.location) %}
-                    {% if img_url is not none %}
-                    <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
-                        <img class="img-fluid mb-3" src="{{ img_url }}" alt="">
-                    </a>
-                    {% endif %}
-                    <h5 class="card-subtitle mb-2">${{ item.price }}</h5>
-                    {% if item.location %}
-                    <p class="mb-2">
-                        <a class="card-link" href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
-                            Find me here
-                        </a>
-                    </p>
-                    {% endif %}
-                    {% if item.user_id == g.user.id or user.parent_id == g.user.id %}
-                    <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
-                        <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
-                            Remove
-                        </button>
-                    </form>
-                    {% elif item.transaction is not none %}
-                        {% if item.transaction.gifter_id == g.user.id %}
-                        <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
-                            <input type="hidden" id="transaction_id" name="transaction_id"
-                                   value="{{ item.transaction.id }}">
-                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmUnclaim()">
-                                Unclaim
-                            </button>
-                        </form>
-                        {% else %}
-                        <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
-                        {% endif %}
-                    {% else %}
-                    <form action="{{ request.path }}/transactions" method="post">
-                        <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
-                        <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
-                        <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
-                        <button class="btn btn-primary btn-sm" type="submit">
-                            Claim
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
+    <div class="card-columns">
+        {% for item in wishlist %}
+        {% if item.priority == 'low' %}
+        <div class="card border-success">
+        {% elif item.priority == 'medium' %}
+        <div class="card border-warning">
+        {% elif item.priority == 'high' %}
+        <div class="card border-danger">
+        {% else %}
+        <div class="card">
+        {% endif %}
+            <div class="card-header text-left">
+                {{ item.description }}
             </div>
-            {% endfor %}
+            {% if item.notes %}
+            <blockquote>
+                <p class="text-left font-italic m-0 pl-3 pr-3 pt-2 pb-0">{{ item.notes }}</p>
+                <footer class="blockquote-footer text-right pr-3">{{ user.first_name }}</footer>
+            </blockquote>
+            {% endif %}
+            <div class="card-body">
+                {% if item.image %}
+                <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
+                    <img class="img-fluid mb-3" src="{{ url_for('main.item_image', item_id=item.id) }}" alt="">
+                </a>
+                {% endif %}
+                <h5 class="card-subtitle mb-2">${{ item.price }}</h5>
+                {% if item.location %}
+                <p class="mb-2">
+                    <a class="card-link" href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
+                        Find me here
+                    </a>
+                </p>
+                {% endif %}
+                {% if item.user_id == g.user.id or user.parent_id == g.user.id %}
+                <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
+                    <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
+                    <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                        Remove
+                    </button>
+                </form>
+                {% elif item.transaction is not none %}
+                    {% if item.transaction.gifter_id == g.user.id %}
+                    <form action="{{ request.path }}/transactions/{{ item.transaction.id }}/delete" method="post">
+                        <input type="hidden" id="transaction_id" name="transaction_id"
+                               value="{{ item.transaction.id }}">
+                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmUnclaim()">
+                            Unclaim
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
+                    {% endif %}
+                {% else %}
+                <form action="{{ request.path }}/transactions" method="post">
+                    <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
+                    <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
+                    <button class="btn btn-primary btn-sm" type="submit">
+                        Claim
+                    </button>
+                </form>
+                {% endif %}
+            </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 <!-- modals -->
@@ -207,6 +212,13 @@ wishlist
                                 <option value="high">high</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">
+                            Any additional info that will help us procure it?<br>
+                            <span class="text-small font-italic">e.g. color, size, style, or comments</span>
+                        </label>
+                        <textarea class="form-control" id="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

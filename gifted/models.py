@@ -184,9 +184,11 @@ class Item(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     description = db.Column(db.String(240), nullable=False)
     price = db.Column(db.Numeric(5, 2), nullable=False)
-    location = db.Column(db.String(1024), nullable=False)
-    quantity = db.Column(db.Integer, default=1)
+    location = db.Column(db.String(1024))
+    image_url = db.Column(db.String(1024))
+    image = db.Column(db.LargeBinary)
     priority = db.Column(db.String(40), default='medium')
+    notes = db.Column(db.String(1024))
     transaction = db.relationship('Transaction', uselist=False, backref='item', cascade='all,delete')
 
     def __repr__(self):
