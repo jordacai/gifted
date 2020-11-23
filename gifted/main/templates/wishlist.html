@@ -4,6 +4,16 @@
 wishlist
 {% endblock %}
 
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $("#wishlistModal").on('shown.bs.modal', function(){
+        $('#description').trigger('focus');
+    });
+});
+</script>
+{% endblock %}
+
 {% block top_nav %}
 <div class="container">
     <div class="navbar">
@@ -11,11 +21,9 @@ wishlist
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Events</a></li>
                 <li class="breadcrumb-item"><a href="/events/{{ event.id }}">{{ event.title }}</a></li>
-                {% if user.id == g.user.id %}
-                <li class="breadcrumb-item active" aria-current="page">My wishlist</li>
-                {% else %}
-                <li class="breadcrumb-item active" aria-current="page">{{ user.first_name }}</li>
-                {% endif %}
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if user.id == g.user.id %}My wishlist{% else %}{{ user.first_name }}{% endif %}
+                </li>
             </ol>
         </nav>
     </div>
@@ -83,6 +91,7 @@ wishlist
             {% endif %}
         {% endif %}
 
+        {% if wishlist %}
         <div class="mx-auto">
             <ul class="list-group mb-3">
                 <li class="list-group-item list-group-item-danger">Red is high priority</li>
@@ -90,19 +99,15 @@ wishlist
                 <li class="list-group-item list-group-item-success">Green is low priority</li>
             </ul>
         </div>
+        {% endif %}
     </div>
 
     <div class="card-columns">
         {% for item in wishlist %}
-        {% if item.priority == 'low' %}
-        <div class="card border-success">
-        {% elif item.priority == 'medium' %}
-        <div class="card border-warning">
-        {% elif item.priority == 'high' %}
-        <div class="card border-danger">
-        {% else %}
-        <div class="card">
-        {% endif %}
+        <div class="card
+        {% if item.priority == 'low' %} border-success
+        {% elif item.priority == 'medium' %} border-warning
+        {% elif item.priority == 'high' %} border-danger {% endif %}">
             <div class="card-header text-left">
                 {{ item.description }}
             </div>
@@ -115,7 +120,7 @@ wishlist
             <div class="card-body">
                 {% if item.image %}
                 <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
-                    <img class="img-fluid mb-3" src="{{ url_for('main.item_image', item_id=item.id) }}" alt="">
+                    <img class="mb-3" src="{{ url_for('main.item_image', item_id=item.id) }}" alt="">
                 </a>
                 {% endif %}
                 <h5 class="card-subtitle mb-2">${{ item.price }}</h5>
@@ -176,10 +181,11 @@ wishlist
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="question">description</span>
+                                <span class="input-group-text" id="pre-description">description</span>
                             </div>
-                            <input name="description" type="text" class="form-control"
-                                   placeholder="what would you like?" autocomplete="off" aria-label="question" required>
+                            <input id="description" name="description" type="text" class="form-control"
+                                   autocomplete="off" placeholder="what would you like?" aria-label="pre-description"
+                                   required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -215,7 +221,7 @@ wishlist
                     </div>
                     <div class="form-group">
                         <label for="notes">
-                            Any additional info that will help us procure it?<br>
+                            Any additional info that will help us procure this?<br>
                             <span class="text-small font-italic">e.g. color, size, style, or comments</span>
                         </label>
                         <textarea class="form-control" id="notes" rows="3"></textarea>

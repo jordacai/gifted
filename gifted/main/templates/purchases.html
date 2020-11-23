@@ -37,38 +37,36 @@ purchases
     </div>
 
     {% for giftee_name, transactions in grouped_transactions.items() %}
-    <div>
-        <div class="card-columns">
-            {% for transaction in transactions %}
-            <div class="card">
-                <div class="card-header">
-                    <p class="text-left">
-                        {{ transaction.item.description }}
-                        <span class="text-muted font-italic">
-                            for
-                            <a href="/events/{{ event.id }}/wishlists/{{ transaction.giftee.id }}">
-                                {{ giftee_name }}
-                            </a>
-                        </span>
-                    </p>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>
-                    <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
-                        <input type="hidden" id="purchase_id" name="purchase_id" value="{{ transaction.id }}">
-                        <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
-                            Unclaim
-                        </button>
-                    </form>
-                    <p class="card-text">
-                        <small class="text-muted">Claimed on {{ pretty_datetime(transaction.transacted_on) }}</small>
-                    </p>
-                </div>
+    <div class="card-columns mb-3">
+        {% for transaction in transactions %}
+        <div class="card">
+            <div class="card-header">
+                <p class="text-left">
+                    {{ transaction.item.description }}
+                    <span class="text-muted font-italic">
+                        for
+                        <a href="/events/{{ event.id }}/wishlists/{{ transaction.giftee.id }}">
+                            {{ giftee_name }}
+                        </a>
+                    </span>
+                </p>
             </div>
-            {% endfor %}
+            <div class="card-body">
+                <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>
+                <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
+                    <input type="hidden" id="purchase_id" name="purchase_id" value="{{ transaction.id }}">
+                    <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
+                        Unclaim
+                    </button>
+                </form>
+                <p class="card-text">
+                    <small class="text-muted">Claimed on {{ pretty_datetime(transaction.transacted_on) }}</small>
+                </p>
+            </div>
         </div>
-        <hr class="my-4">
+        {% endfor %}
     </div>
+    <hr>
     {% endfor %}
 </div>
 {% endblock %}

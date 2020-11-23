@@ -4,13 +4,30 @@
 event
 {% endblock %}
 
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $("#childModal").on('shown.bs.modal', function(){
+        $('#firstName').trigger('focus');
+    });
+});
+</script>
+<script>
+$(document).ready(function(){
+    $("#inviteModal").on('shown.bs.modal', function(){
+        $('#email').trigger('focus');
+    });
+});
+</script>
+{% endblock %}
+
 {% block top_nav %}
 <div class="container">
     <div class="navbar">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Admin</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><a href="/admin/events">Events</a></li>
+                <li class="breadcrumb-item">Admin</li>
+                <li class="breadcrumb-item"><a href="/admin/events">Events</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
             </ol>
         </nav>
@@ -237,10 +254,11 @@ event
                         </select>
                     </div>
                     <div class="form-group">
-                        <input class="form-control" name="firstName" placeholder="first name" type="text">
+                        <input class="form-control" id="firstName" name="firstName" placeholder="first name"
+                               type="text" required>
                     </div>
                     <div class="form-group">
-                        <input class="form-control" name="lastName" placeholder="last name" type="text">
+                        <input class="form-control" name="lastName" placeholder="last name" type="text" required>
                     </div>
                     <input hidden name="eventId" value="{{ event.id }}">
                 </div>
@@ -265,7 +283,8 @@ event
                 <div class="modal-body">
                     <div class="form-group">
                         <div class="input-group col-sm">
-                            <input class="form-control" autocomplete="off" autofocus name="email" placeholder="email" type="email">
+                            <input class="form-control" id="email" autocomplete="off" autofocus name="email"
+                                   placeholder="email" type="email" required>
                             <input hidden name="eventId" value="{{ event.id }}">
                         </div>
                     </div>
