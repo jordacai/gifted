@@ -36,14 +36,21 @@ purchases
         {% endif %}
     </div>
 
-    {% for giftee, transactions in grouped_transactions.items() %}
+    {% for giftee_name, transactions in grouped_transactions.items() %}
     <div>
         <div class="card-columns">
             {% for transaction in transactions %}
             <div class="card">
                 <div class="card-header">
-                    <p class="text-left">{{ transaction.item.description }}</p>
-                    <p class="card-subtitle text-muted text-right font-italic">for {{ giftee }}</p>
+                    <p class="text-left">
+                        {{ transaction.item.description }}
+                        <span class="text-muted font-italic">
+                            for
+                            <a href="/events/{{ event.id }}/wishlists/{{ transaction.giftee.id }}">
+                                {{ giftee_name }}
+                            </a>
+                        </span>
+                    </p>
                 </div>
                 <div class="card-body">
                     <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>

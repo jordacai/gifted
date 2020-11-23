@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import requests
 from flask import Blueprint, render_template, request, flash, url_for, session, current_app, g
 from flask_mail import Message
 from werkzeug import security
@@ -7,7 +8,7 @@ from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail, app
-from gifted.helpers import generate_code, group_by
+from gifted.helpers import generate_code, group_by, get_image_url_from_metadata
 from gifted.models import User, Invite, Event, Item, Transaction, Reset
 
 main = Blueprint('main', __name__,
@@ -130,14 +131,24 @@ def wishlist(event_id, user_id):
         description = request.form.get('description')
         location = request.form.get('location')
         price = request.form.get('price')
-        quantity = request.form.get('quantity')
         priority = request.form.get('priority')
+        notes = request.form.get('notes')
+        image_url = None
+        file = None
 
-        item = Item(description=description, location=location, price=price, quantity=quantity, priority=priority,
-                    event_id=event_id, user_id=user_id)
+        if location:
+            image_url = get_image_url_from_metadata(location)
+            if image_url is not None:
+                try:
+                    r = requests.get(image_url)
+                    file = r.content
+                except Exception as e:
+                    app.logger.warn(f'Failed to download image from {image_url}. {e}')
+
+        item = Item(description=description, location=location, image_url=image_url, image=file, price=price,
+                    priority=priority, notes=notes, event_id=event_id, user_id=user_id)
         db.session.add(item)
         db.session.commit()
-
         return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
     event = Event.query.get(event_id)
@@ -148,6 +159,12 @@ def wishlist(event_id, user_id):
     items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
     progress = get_wishlist_progress(event_id, user_id)
     return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
+
+
+@main.route('/items/<item_id>/image')
+def item_image(item_id):
+    item = Item.query.get(item_id)
+    return app.response_class(item.image, mimetype='image/png')
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>/children')
