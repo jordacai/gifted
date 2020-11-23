@@ -1,6 +1,8 @@
 from datetime import datetime
+from io import BytesIO
 
 import requests
+from PIL import Image
 from flask import Blueprint, render_template, request, flash, url_for, session, current_app, g
 from flask_mail import Message
 from werkzeug import security
@@ -134,18 +136,20 @@ def wishlist(event_id, user_id):
         priority = request.form.get('priority')
         notes = request.form.get('notes')
         image_url = None
-        file = None
+        b = None
 
         if location:
             image_url = get_image_url_from_metadata(location)
             if image_url is not None:
                 try:
-                    r = requests.get(image_url)
-                    file = r.content
+                    image = Image.open(requests.get(image_url, stream=True).raw)
+                    image.thumbnail((250, 250))
+                    b = BytesIO()
+                    image.save(b, format='PNG')
                 except Exception as e:
                     app.logger.warn(f'Failed to download image from {image_url}. {e}')
 
-        item = Item(description=description, location=location, image_url=image_url, image=file, price=price,
+        item = Item(description=description, location=location, image_url=image_url, image=b.getvalue(), price=price,
                     priority=priority, notes=notes, event_id=event_id, user_id=user_id)
         db.session.add(item)
         db.session.commit()
