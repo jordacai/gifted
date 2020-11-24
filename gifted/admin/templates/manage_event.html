@@ -78,7 +78,8 @@ $(document).ready(function(){
                     <td>{{ user.username }}</td>
                     <td>{{ user.get_full_name() }}</td>
                     <td>{{ pretty_date(user.registered_on) }}</td>
-                    <td>{% if user in event.admins %}True{% else %}False</td>
+                    {% if user not in event.admins %}
+                    <td>False</td>
                     <td>
                         <form action="/admin/remove-user" method="post">
                             <input hidden name="eventId" value="{{ event.id }}">
@@ -86,9 +87,11 @@ $(document).ready(function(){
                             <button class="btn btn-danger btn-sm" type="submit">remove</button>
                         </form>
                     </td>
+                    {% else %}
+                    <td>True</td><td></td>
                     {% endif %}
-                {% endif %}
                 </tr>
+                {% endif %}
                     {% for child in event.children %}
                     {% if child.parent_id == user.id %}
                     <tr>
@@ -96,7 +99,13 @@ $(document).ready(function(){
                         <td>{{ child.get_full_name() }}</td>
                         <td>{{ pretty_date(child.created_on) }}</td>
                         <td>False</td>
-                        <td></td>
+                        <td>
+                            <form action="/admin/remove-user" method="post">
+                                <input hidden name="eventId" value="{{ event.id }}">
+                                <input hidden name="userId" value="{{ child.id }}">
+                                <button class="btn btn-danger btn-sm" type="submit">remove</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endif %}
                     {% endfor %}
@@ -147,7 +156,7 @@ $(document).ready(function(){
         </table>
     </div>
     {% else %}
-    <p>No pending invites</p>
+    <p class="mt-5">No pending invites</p>
     {% endif %}
     <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#inviteModal">
       Invite someone
@@ -215,6 +224,10 @@ $(document).ready(function(){
                                 </option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isAdminAdd" name="isAdminAdd" value="True">
+                        <label class="form-check-label" for="isAdminAdd">Make administrator?</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -288,9 +301,9 @@ $(document).ready(function(){
                             <input hidden name="eventId" value="{{ event.id }}">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <input class="form-check-input" type="checkbox" id="isAdmin" name="isAdmin" value="True">
-                        <label class="form-check-label" for="isAdmin">Is administrator?</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isAdminInvite" name="isAdminInvite" value="True">
+                        <label class="form-check-label" for="isAdminInvite">Make administrator?</label>
                     </div>
                 </div>
                 <div class="modal-footer">

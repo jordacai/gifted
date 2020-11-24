@@ -1,11 +1,5 @@
-import logging
-import os
-import re
 from datetime import date
-from logging.handlers import RotatingFileHandler
-from urllib.parse import urlparse
 
-import metadata_parser
 from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -21,6 +15,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
+app.extensions['mail'].debug = 0
 Talisman(app, content_security_policy=None)
 
 from gifted import models, errors
@@ -34,6 +29,11 @@ app.register_blueprint(main)
 def template_function(func):
     app.jinja_env.globals[func.__name__] = func
     return func
+
+
+@template_function
+def child_check(event_children, my_children):
+    return any(child in event_children for child in my_children)
 
 
 @template_function

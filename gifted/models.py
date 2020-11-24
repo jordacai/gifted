@@ -56,6 +56,8 @@ class User(db.Model):
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
     parent = db.relationship('User', remote_side=id, foreign_keys=[parent_id])
+    children = db.relationship('User', primaryjoin='User.id == User.parent_id', foreign_keys=[parent_id],
+                               remote_side=[parent_id])
 
     def __repr__(self):
         return '<User id=%r, username=%r, name=%r>' % (self.id, self.username, self.get_full_name())
@@ -135,7 +137,7 @@ class Event(db.Model):
                              lazy=True)
     children = db.relationship('User',
                                secondary=event_child,
-                               backref=db.backref('children', lazy=True),
+                               backref=db.backref('child_events', lazy=True),
                                lazy=True)
     pairs = db.relationship('Pair', backref='event', lazy=True)
     invites = db.relationship('Invite', backref='event', lazy=True)

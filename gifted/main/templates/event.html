@@ -35,7 +35,9 @@ event
             <li class="lead">You are on the hook for <strong>${{ liability }}</strong></li>
             <li><a href="/events/{{ event.id }}/purchases/{{ g.user.id }}">Manage my purchases</a></li>
             {% endif %}
+            {% if child_check(event.children, g.user.children) %}
             <li><a href="/events/{{ event.id }}/wishlists/{{ g.user.id }}/children">Manage my children</a></li>
+            {% endif %}
         </ul>
     </div>
 

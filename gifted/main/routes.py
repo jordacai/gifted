@@ -53,7 +53,7 @@ def login():
             app.logger.info(f'{user.username} logged in')
             return redirect(url_for('main.index'))
         else:
-            flash('Invalid password!', 'warning')
+            flash('Invalid credentials!', 'warning')
             return redirect(url_for('main.login'))
 
     # it's a GET, render the template
@@ -153,6 +153,7 @@ def wishlist(event_id, user_id):
                     priority=priority, notes=notes, event_id=event_id, user_id=user_id)
         db.session.add(item)
         db.session.commit()
+        flash(f'Added {item.description} to your wishlist!', 'success')
         return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
     event = Event.query.get(event_id)
@@ -198,9 +199,12 @@ def purchases(event_id, user_id):
 def remove_purchase(event_id, user_id):
     purchase_id = request.form.get('purchase_id')
     purchase = Transaction.query.get(purchase_id)
+    item = purchase.item.description
+    giftee = purchase.giftee.first_name
+
     db.session.delete(purchase)
     db.session.commit()
-    flash('You deleted a purchase!', 'warning')
+    flash(f'You unclaimed "{item}" for {giftee}!', 'warning')
     return redirect(url_for('main.purchases', event_id=event_id, user_id=user_id))
 
 
@@ -209,9 +213,10 @@ def remove_purchase(event_id, user_id):
 def remove_item(event_id, user_id, item_id):
     item_id = request.form.get('item_id')
     item = Item.query.get(item_id)
+    description = item.description
     db.session.delete(item)
     db.session.commit()
-    flash('You deleted an item!', 'warning')
+    flash(f'You deleted "{description}" from your wishlist!', 'warning')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
 
@@ -222,30 +227,11 @@ def claim_item(event_id, user_id):
     gifter_id = request.form.get('gifter_id')
     giftee_id = request.form.get('giftee_id')
 
-    item = Item.query.get(item_id)
     transaction = Transaction(event_id=event_id, item_id=item_id, gifter_id=gifter_id, giftee_id=giftee_id)
     db.session.add(transaction)
-    item.is_purchased = 1
     db.session.commit()
 
-    flash('You claimed an item!', 'success')
-    return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
-
-
-@main.route('/events/<event_id>/wishlists/<user_id>/transactions/<transaction_id>/delete', methods=['POST'])
-@login_required
-def unclaim_item(event_id, user_id, transaction_id):
-    if transaction_id != request.form.get('transaction_id'):
-        flash('Transaction identifiers do not match.', 'warning')
-        return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
-    transaction = Transaction.query.get(transaction_id)
-    item = transaction.item
-    item.is_purchased = 0
-    db.session.add(item)
-    db.session.commit()
-    db.session.delete(transaction)
-    db.session.commit()
-    flash('You unclaimed an item!', 'warning')
+    flash(f'You claimed "{transaction.item.description}" for {transaction.giftee.first_name}!', 'success')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
 
 
