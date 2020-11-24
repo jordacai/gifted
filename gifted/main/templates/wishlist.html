@@ -200,7 +200,7 @@ $(document).ready(function(){
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="pre-price">price ($)</span>
+                                <span class="input-group-text" id="pre-price">price</span>
                             </div>
                             <input name="price" type="number" min="0.01" step="0.01" class="form-control"
                                    placeholder="how much is it?" aria-describedby="pre-price" required>
@@ -224,7 +224,7 @@ $(document).ready(function(){
                             Any additional info that will help us procure this?<br>
                             <span class="text-small font-italic">e.g. color, size, style, or comments</span>
                         </label>
-                        <textarea class="form-control" id="notes" rows="3"></textarea>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
