@@ -15,7 +15,6 @@ def not_found(error):
     return render_template('not_found.html', error=error), 404
 
 
-
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()

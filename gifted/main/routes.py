@@ -65,6 +65,8 @@ def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     session.pop('is_admin', None)
+    app.logger.info(f'{g.user.username} logged out')
+    g.pop('user', None)
     return redirect(url_for('main.login'))
 
 
