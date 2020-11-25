@@ -7,6 +7,21 @@ wishlist
 {% block scripts %}
 <script>
 $(document).ready(function(){
+  $('[data-toggle="highPriority"]').tooltip();
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="mediumPriority"]').tooltip();
+});
+</script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="lowPriority"]').tooltip();
+});
+</script>
+<script>
+$(document).ready(function(){
     $("#wishlistModal").on('shown.bs.modal', function(){
         $('#description').trigger('focus');
     });
@@ -45,7 +60,8 @@ $(document).ready(function(){
             {% endif %}
         <div>
             <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
-                Add to wishlist
+                <i class="fas fa-plus"></i>
+                <span class="ml-2">Add to wishlist</span>
             </button>
         </div>
         <!-- This is a parent's child, treat it like their own wishlist! -->
@@ -60,7 +76,8 @@ $(document).ready(function(){
             {% endif %}
         <div>
             <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#wishlistModal">
-                Add to wishlist
+                <i class="fas fa-plus"></i>
+                <span class="ml-2">Add to wishlist</span>
             </button>
         </div>
         <!-- This is for every other user, show progress with friendly messages! -->
@@ -90,34 +107,36 @@ $(document).ready(function(){
                 {% endif %}
             {% endif %}
         {% endif %}
-
-        {% if wishlist %}
-        <div class="mx-auto">
-            <ul class="list-group mb-3">
-                <li class="list-group-item list-group-item-danger">Red is high priority</li>
-                <li class="list-group-item list-group-item-warning">Yellow is medium priority</li>
-                <li class="list-group-item list-group-item-success">Green is low priority</li>
-            </ul>
-        </div>
-        {% endif %}
     </div>
 
     <div class="card-columns">
         {% for item in wishlist %}
-        <div class="card
-        {% if item.priority == 'low' %} border-success
-        {% elif item.priority == 'medium' %} border-warning
-        {% elif item.priority == 'high' %} border-danger {% endif %}">
+        <div class="card border-secondary">
             <div class="card-header text-left">
-                {{ item.description }}
+                <h5>{{ item.description }}</h5>
             </div>
-            {% if item.notes %}
-            <blockquote>
-                <p class="text-left font-italic m-0 pl-3 pr-3 pt-2 pb-0">{{ item.notes }}</p>
-                <footer class="blockquote-footer text-right pr-3">{{ user.first_name }}</footer>
-            </blockquote>
-            {% endif %}
-            <div class="card-body">
+            <div class="card-body pt-2">
+                <div class="pb-3 text-left">
+                    {% if item.priority == 'low' %}
+                        <span data-toggle="lowPriority" data-placement="bottom" title="This is low priority.">
+                            🔥
+                        </span>
+                    {% elif item.priority == 'medium' %}
+                        <span data-toggle="mediumPriority" data-placement="bottom" title="This is medium priority.">
+                            🔥🔥
+                        </span>
+                    {% elif item.priority == 'high' %}
+                        <span data-toggle="highPriority" data-placement="bottom" title="This is high priority!">
+                            🔥🔥🔥
+                        </span>
+                {% endif %}
+                </div>
+                {% if item.notes %}
+                <blockquote>
+                    <p class="text-left font-italic">{{ item.notes }}</p>
+                    <footer class="blockquote-footer text-right">{{ user.first_name }}</footer>
+                </blockquote>
+                {% endif %}
                 {% if item.image %}
                 <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
                     <img class="mb-3" src="{{ url_for('main.item_image', item_id=item.id) }}" alt="">
@@ -127,7 +146,7 @@ $(document).ready(function(){
                 {% if item.location %}
                 <p class="mb-2">
                     <a class="card-link" href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
-                        Find me here
+                        <i class="fas fa-search"></i><span class="ml-2">Find me</span>
                     </a>
                 </p>
                 {% endif %}
@@ -135,7 +154,7 @@ $(document).ready(function(){
                 <form action="{{ request.path }}/items/{{ item.id }}/delete" method="post">
                     <input type="hidden" id="deleted_item_id" name="item_id" value="{{ item.id }}">
                     <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
-                        Remove
+                        <i class="fas fa-minus"></i><span class="ml-2">Remove</span>
                     </button>
                 </form>
                 {% elif item.transaction is not none %}
@@ -144,11 +163,13 @@ $(document).ready(function(){
                         <input type="hidden" id="transaction_id" name="transaction_id"
                                value="{{ item.transaction.id }}">
                         <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmUnclaim()">
-                            Unclaim
+                            <i class="fas fa-times-circle"></i><span class="ml-2">Unclaim</span>
                         </button>
                     </form>
                     {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>Claimed</button>
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fas fa-check-circle"></i><span class="ml-2">Already claimed!</span>
+                    </button>
                     {% endif %}
                 {% else %}
                 <form action="{{ request.path }}/transactions" method="post">
@@ -156,7 +177,7 @@ $(document).ready(function(){
                     <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
                     <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
                     <button class="btn btn-primary btn-sm" type="submit">
-                        Claim
+                        <i class="fas fa-check-circle"></i><span class="ml-2">Claim</span>
                     </button>
                 </form>
                 {% endif %}

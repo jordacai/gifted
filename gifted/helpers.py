@@ -6,14 +6,14 @@ from functools import wraps
 from urllib.parse import urlparse
 
 import metadata_parser
-from flask import session, url_for, flash
+from flask import session, url_for, flash, g
 from werkzeug.utils import redirect
 
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get('user_id') is None:
+        if session.get('user_id') is None or g.user is None:
             return redirect(url_for('main.login'))
         return f(*args, **kwargs)
     return decorated_function

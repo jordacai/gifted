@@ -39,7 +39,9 @@ children
                          aria-valuemax="100">
                     </div>
                 </div>
-                <a href="/events/{{ event.id }}/wishlists/{{ child.id }}" class="btn btn-warning">Manage wishlist</a>
+                <a href="/events/{{ event.id }}/wishlists/{{ child.id }}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i><span class="ml-2">Manage wishlist</span>
+                </a>
             </div>
         </div>
         {% endfor %}

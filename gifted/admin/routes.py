@@ -1,13 +1,14 @@
 import uuid
+from copy import deepcopy
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, flash, url_for, current_app, session, g
+from flask import Blueprint, render_template, request, flash, url_for, current_app, g
 from flask_mail import Message
 from werkzeug import security
 from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
-from gifted import db, mail
+from gifted import db, mail, app
 from gifted.helpers import generate_code, login_required
 from gifted.models import Invite, Event, User
 
@@ -25,7 +26,6 @@ def index():
 @admin.route('/admin/events/<event_id>')
 @login_required
 def manage_event(event_id):
-    # todo: this is pretty hacky, is there a way to push this onto the db?
     event = Event.query.get(event_id)
     if g.user not in event.admins:
         abort(401)
@@ -51,7 +51,7 @@ def create_event():
     ends_on = datetime.strptime(request.form.get('endsOn'), '%Y-%m-%d').date()
     add_me = request.form.get('addMe')
 
-    # todo: implement add_me logic, and maybe the concept of a super admin/site admin? this list of users could get auto-added to all events
+    # todo: maybe add the concept of a super admin/site admin? this list of users could get auto-added to all events
 
     event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
     event.admins.append(g.user)
@@ -61,6 +61,7 @@ def create_event():
     db.session.commit()
 
     flash('Event created successfully!', 'success')
+    app.logger.info(f'{g.user.username} created {event}')
     return redirect(url_for('admin.index'))
 
 
@@ -74,6 +75,7 @@ def matchmake(event_id):
     event = Event.query.get(event_id)
     event.matchmake(users_to_shuffle)
     flash('Shuffled users!', 'success')
+    app.logger.info(f'{g.user.username} shuffled {event}')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
@@ -84,6 +86,7 @@ def delete_event(event_id):
     db.session.delete(event)
     db.session.commit()
     flash(f'Deleted event "{event.title}"!', 'success')
+    app.logger.info(f'{g.user.username} deleted {event}')
     return redirect(url_for('admin.index'))
 
 
@@ -102,6 +105,7 @@ def add_users(event_id):
             event.children.append(user)
         db.session.commit()
         flash(f'{user.get_full_name()} was added to {event.title}!', 'success')
+        app.logger.info(f'{g.user.username} added {user} to {event}')
 
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
@@ -126,6 +130,7 @@ def add_user_child():
     db.session.add(child)
     db.session.commit()
     flash(f'Successfully added {child.get_full_name()} as a child of { child.parent.get_full_name()}!', 'success')
+    app.logger.info(f'{g.user.username} created child {child} of {child.parent}')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
@@ -141,6 +146,7 @@ def remove_user():
     event.users.remove(user)
     db.session.commit()
     flash(f'Removed {user.get_full_name()} from {event.title}!', 'success')
+    app.logger.info(f'{g.user.username} removed {user} from {event}')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
@@ -148,9 +154,11 @@ def remove_user():
 @login_required
 def delete_user(user_id):
     user = User.query.get(user_id)
+    copy = deepcopy(user)
     db.session.delete(user)
     db.session.commit()
-    flash(f'Deleted {user.username}\'s account!', 'success')
+    flash(f'Deleted {copy.username}\'s account!', 'success')
+    app.logger.info(f'{g.user.username} deleted {copy}')
     return redirect(url_for('admin.index'))
 
 
@@ -181,14 +189,17 @@ def invite():
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email} to {invitation.event.title}!', 'success')
+    app.logger.info(f'{g.user.username} invited {user} to {event_id}')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 
 @admin.route('/admin/invites/<invite_id>/revoke', methods=['POST'])
 @login_required
 def revoke(invite_id):
-    invitation = Invite.query.filter_by(id=invite_id).first()
+    invitation = Invite.query.get(invite_id)
+    invite_copy = deepcopy(invitation)
     db.session.delete(invitation)
     db.session.commit()
-    flash(f'Revoked {invitation.email}\'s invitation!', 'success')
+    flash(f'Revoked {invite_copy.email}\'s invitation!', 'success')
+    app.logger.info(f'{g.user.username} revoked {invite_copy}')
     return redirect(url_for('admin.manage_event', event_id=invitation.event_id))
