@@ -33,21 +33,21 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">
                             <i class="fas fa-user"></i>
-                            <span class="ml-2">{{ g.user.username }}</span>
+                            <span class="ml-1">{{ g.user.username }}</span>
                         </a>
                     </li>
                     {% if session.is_admin %}
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/events">
                             <i class="fas fa-user-shield"></i>
-                            <span class="ml-2">admin</span>
+                            <span class="ml-1">admin</span>
                         </a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span class="ml-2">logout</span>
+                            <span class="ml-1">logout</span>
                         </a>
                     </li>
                 </ul>
@@ -56,13 +56,13 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/register">
                             <i class="fas fa-user-plus"></i>
-                            <span class="ml-2">register</span>
+                            <span class="ml-1">register</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/login">
                             <i class="fas fa-sign-in-alt"></i>
-                            <span class="ml-2">login</span>
+                            <span class="ml-1">login</span>
                         </a>
                     </li>
                 </ul>

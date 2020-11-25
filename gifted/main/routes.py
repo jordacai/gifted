@@ -11,7 +11,7 @@ from werkzeug.utils import redirect
 
 from gifted import login_required, validate, db, mail, app
 from gifted.helpers import generate_code, group_by, get_image_url_from_metadata
-from gifted.models import User, Invite, Event, Item, Transaction, Reset
+from gifted.models import User, Invite, Event, Item, Transaction, Reset, SiteAdmin
 
 main = Blueprint('main', __name__,
                  template_folder='templates',
@@ -49,7 +49,10 @@ def login():
         if security.check_password_hash(pwhash=user.password, password=password):
             session['user_id'] = user.id
             session['username'] = request.form.get('username')
-            session['is_admin'] = len(user.administration) > 0 or user.is_admin
+            session['is_admin'] = \
+                len(user.administration) > 0 \
+                or user.is_admin \
+                or SiteAdmin.contains(user.id)
             app.logger.info(f'{user.username} logged in')
             return redirect(url_for('main.index'))
         else:

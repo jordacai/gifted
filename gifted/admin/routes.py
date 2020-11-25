@@ -10,7 +10,7 @@ from werkzeug.utils import redirect
 
 from gifted import db, mail, app
 from gifted.helpers import generate_code, login_required
-from gifted.models import Invite, Event, User
+from gifted.models import Invite, Event, User, SiteAdmin
 
 admin = Blueprint('admin', __name__,
                   template_folder='templates',
@@ -20,14 +20,20 @@ admin = Blueprint('admin', __name__,
 @admin.route('/admin/events')
 @login_required
 def index():
-    return render_template('admin.html', events=g.user.administration)
+    if SiteAdmin.contains(g.user.id):
+        events = Event.query.all()
+    else:
+        events = g.user.administration
+    return render_template('admin.html', events=events)
 
 
 @admin.route('/admin/events/<event_id>')
 @login_required
 def manage_event(event_id):
     event = Event.query.get(event_id)
-    if g.user not in event.admins:
+    if event is None:
+        abort(404)
+    if g.user not in event.admins and SiteAdmin.contains(g.user.id) is False:
         abort(401)
 
     existing_ids = []
@@ -51,8 +57,6 @@ def create_event():
     ends_on = datetime.strptime(request.form.get('endsOn'), '%Y-%m-%d').date()
     add_me = request.form.get('addMe')
 
-    # todo: maybe add the concept of a super admin/site admin? this list of users could get auto-added to all events
-
     event = Event(title=title, description=description, starts_on=starts_on, ends_on=ends_on)
     event.admins.append(g.user)
     if add_me:
@@ -71,7 +75,7 @@ def matchmake(event_id):
     users_to_shuffle = request.form.getlist('shuffledUsers')
     if len(users_to_shuffle) < 2:
         flash('A minimum of two are required to shuffle!', 'warning')
-        return redirect(url_for('admin.event', event_id=event_id))
+        return redirect(url_for('admin.manage_event', event_id=event_id))
     event = Event.query.get(event_id)
     event.matchmake(users_to_shuffle)
     flash('Shuffled users!', 'success')
@@ -96,6 +100,7 @@ def add_users(event_id):
     event = Event.query.get(event_id)
     users = request.form.getlist('users')
     is_admin_add = request.form.get('isAdminAdd')
+    usernames = []
     for user_id in users:
         user = User.query.get(user_id)
         event.users.append(user)
@@ -104,9 +109,11 @@ def add_users(event_id):
         if user.parent:
             event.children.append(user)
         db.session.commit()
-        flash(f'{user.get_full_name()} was added to {event.title}!', 'success')
         app.logger.info(f'{g.user.username} added {user} to {event}')
+        usernames.append(user.username)
 
+    username_list = ', '.join(usernames)
+    flash(f'Added {username_list} to {event.title}!', 'success')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 

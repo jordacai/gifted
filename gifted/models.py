@@ -20,9 +20,10 @@ event_child = db.Table('event_child',
 
 
 class Pair(db.Model):
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
-    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)
@@ -43,6 +44,18 @@ class Reset(db.Model):
         return True if now > self.expires_on else False
 
 
+class SiteAdmin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '<SiteAdmin id=%r, user_id=%r>' % (self.id, self.user_id)
+
+    @classmethod
+    def contains(cls, user_id):
+        return db.session.query(SiteAdmin.id).filter_by(user_id=user_id).scalar() is not None
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -53,7 +66,8 @@ class User(db.Model):
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
-    pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id])
+    pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id],
+                           cascade="all, delete-orphan")
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
     parent = db.relationship('User', remote_side=id, foreign_keys=[parent_id])
     children = db.relationship('User', primaryjoin='User.id == User.parent_id', foreign_keys=[parent_id],
@@ -139,8 +153,8 @@ class Event(db.Model):
                                secondary=event_child,
                                backref=db.backref('child_events', lazy=True),
                                lazy=True)
-    pairs = db.relationship('Pair', backref='event', lazy=True)
-    invites = db.relationship('Invite', backref='event', lazy=True)
+    pairs = db.relationship('Pair', backref='event', lazy=True, cascade="all, delete-orphan")
+    invites = db.relationship('Invite', backref='event', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return '<Event id=%r, title=%r>' % (self.id, self.title)
