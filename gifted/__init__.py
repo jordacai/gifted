@@ -29,17 +29,16 @@ app.register_blueprint(admin)
 app.register_blueprint(main)
 
 if app.config['LOG_TO_STDOUT']:
+    del app.logger.handlers[:]
     stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
     stream_handler.setLevel(logging.INFO)
     app.logger.addHandler(stream_handler)
 else:
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/gifted.log',
-                                       maxBytes=10240, backupCount=10)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s '
-        '[in %(pathname)s:%(lineno)d]'))
+    file_handler = RotatingFileHandler('logs/gifted.log', maxBytes=10240, backupCount=10)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 

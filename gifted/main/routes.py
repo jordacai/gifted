@@ -137,22 +137,25 @@ def wishlist(event_id, user_id):
         price = request.form.get('price')
         priority = request.form.get('priority')
         notes = request.form.get('notes')
-        image_url = None
-        b = None
+        item = None
 
         if location:
             image_url = get_image_url_from_metadata(location)
+            print(image_url)
             if image_url is not None:
                 try:
                     image = Image.open(requests.get(image_url, stream=True).raw)
                     image.thumbnail((250, 250))
                     b = BytesIO()
                     image.save(b, format='PNG')
+                    item = Item(description=description, location=location, image_url=image_url, image=b.getvalue(),
+                                price=price, priority=priority, notes=notes, event_id=event_id, user_id=user_id)
                 except Exception as e:
                     app.logger.warn(f'Failed to download image from {image_url}. {e}')
+            else:
+                item = Item(description=description, location=location, price=price, priority=priority, notes=notes,
+                            event_id=event_id, user_id=user_id)
 
-        item = Item(description=description, location=location, image_url=image_url, image=b.getvalue(), price=price,
-                    priority=priority, notes=notes, event_id=event_id, user_id=user_id)
         db.session.add(item)
         db.session.commit()
         flash(f'Added {item.description} to your wishlist!', 'success')

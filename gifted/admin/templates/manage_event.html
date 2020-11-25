@@ -97,7 +97,7 @@ $(document).ready(function(){
                     <tr>
                         <td class="text-center">👶</td>
                         <td>{{ child.get_full_name() }}</td>
-                        <td>{{ pretty_date(child.created_on) }}</td>
+                        <td>{{ pretty_date(child.registered_on) }}</td>
                         <td>False</td>
                         <td>
                             <form action="/admin/remove-user" method="post">

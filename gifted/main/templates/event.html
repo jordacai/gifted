@@ -22,23 +22,31 @@ event
     <div class="jumbotron">
         <h2>{{ event.title }}</h2>
         <p class="lead">{{ event.description }}</p>
+        <div>
         <a class="btn btn-primary" href="/events/{{ event.id }}/wishlists/{{ g.user.id }}" role="button">
-            View my wishlist
+            <i class="fas fa-edit"></i><span class="ml-2">Manage my wishlist</span>
         </a>
-        <hr class="my-3">
-        <ul class="list-unstyled">
-            {% if event.users|length < 2 %}
-            <li class="lead">It's quiet in here...<li>
-            {% elif liability == 0 %}
-            <li class="lead">Start purchasing!</li>
-            {% else %}
-            <li class="lead">You are on the hook for <strong>${{ liability }}</strong></li>
-            <li><a href="/events/{{ event.id }}/purchases/{{ g.user.id }}">Manage my purchases</a></li>
+        </div>
+        <div class="btn-group-vertical text-justify">
+            {% if liability != 0 %}
+            <a class="btn" href="/events/{{ event.id }}/purchases/{{ g.user.id }}">
+                <i class="fas fa-shopping-cart"></i><span class="ml-2">Manage my purchases</span>
+            </a>
             {% endif %}
             {% if child_check(event.children, g.user.children) %}
-            <li><a href="/events/{{ event.id }}/wishlists/{{ g.user.id }}/children">Manage my children</a></li>
+            <a class="btn" href="/events/{{ event.id }}/wishlists/{{ g.user.id }}/children">
+                <i class="fas fa-baby"></i><span class="ml-2">Manage my children</span>
+            </a>
             {% endif %}
-        </ul>
+        </div>
+        <hr class="my-3">
+        {% if event.users|length < 2 %}
+            <span class="lead">It's quiet in here...</span>
+        {% elif liability == 0 %}
+            <span class="lead">Start purchasing!</span>
+        {% else %}
+            <span class="lead">You are on the hook for <strong>${{ liability }}</strong></span>
+        {% endif %}
     </div>
 
     <div class="mb-4">
@@ -60,7 +68,9 @@ event
                          aria-valuemax="100">
                     </div>
                 </div>
-                <a href="/events/{{ event.id }}/wishlists/{{ giftee.id }}" class="btn btn-primary">View wishlist</a>
+                <a href="/events/{{ event.id }}/wishlists/{{ giftee.id }}" class="btn btn-primary">
+                    <i class="fas fa-list"></i><span class="ml-2">View wishlist</span>
+                </a>
             </div>
         </div>
     </div>
@@ -81,7 +91,9 @@ event
                              aria-valuemax="100">
                         </div>
                     </div>
-                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-warning">Manage wishlist</a>
+                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i><span class="ml-2">Manage wishlist</span>
+                    </a>
                 {% else %}
                 {% if progress.get(user.id).percent == '100.00' %}
                     <p>wishlist is complete!</p>
@@ -97,7 +109,9 @@ event
                              aria-valuemax="100">
                         </div>
                     </div>
-                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">View wishlist</a>
+                    <a href="/events/{{ event.id }}/wishlists/{{ user.id }}" class="btn btn-primary">
+                        <i class="fas fa-list"></i><span class="ml-2">View wishlist</span>
+                    </a>
                 {% endif %}
                 </div>
             </div>
