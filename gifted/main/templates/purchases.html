@@ -53,7 +53,7 @@ purchases
             </div>
             <div class="card-body">
                 <h5 class="card-subtitle mb-2">${{ transaction.item.price }}</h5>
-                <form action="/events/{{ event.id }}/purchases/{{ session['user_id'] }}/delete" method="post">
+                <form action="/events/{{ event.id }}/purchases/{{ g.user.id }}/delete" method="post">
                     <input type="hidden" id="purchase_id" name="purchase_id" value="{{ transaction.id }}">
                     <button class="btn btn-danger btn-sm" type="submit" onclick="return confirmDelete()">
                         Unclaim

@@ -122,13 +122,14 @@ def register():
 @login_required
 def event(event_id):
     event = Event.query.get(event_id)
+    if event is None:
+        abort(404)
     if g.user not in event.users:
         abort(401)
 
     liability = Transaction.get_user_liability(event.id, g.user.id)
     progress = get_event_progress(event_id)
-    giftee = User.query.get(g.user.pair.giftee_id)
-    return render_template('event.html', event=event, progress=progress, liability=liability, giftee=giftee)
+    return render_template('event.html', event=event, progress=progress, liability=liability, giftee=g.user.pair)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
@@ -140,24 +141,21 @@ def wishlist(event_id, user_id):
         price = request.form.get('price')
         priority = request.form.get('priority')
         notes = request.form.get('notes')
-        item = None
+        item = Item(description=description, location=location, price=price, priority=priority, notes=notes,
+                    event_id=event_id, user_id=user_id)
 
         if location:
             image_url = get_image_url_from_metadata(location)
-            print(image_url)
             if image_url is not None:
                 try:
                     image = Image.open(requests.get(image_url, stream=True).raw)
                     image.thumbnail((250, 250))
                     b = BytesIO()
                     image.save(b, format='PNG')
-                    item = Item(description=description, location=location, image_url=image_url, image=b.getvalue(),
-                                price=price, priority=priority, notes=notes, event_id=event_id, user_id=user_id)
+                    item.image_url = image_url
+                    item.image = b.getvalue()
                 except Exception as e:
                     app.logger.warn(f'Failed to download image from {image_url}. {e}')
-            else:
-                item = Item(description=description, location=location, price=price, priority=priority, notes=notes,
-                            event_id=event_id, user_id=user_id)
 
         db.session.add(item)
         db.session.commit()
@@ -166,10 +164,14 @@ def wishlist(event_id, user_id):
 
     event = Event.query.get(event_id)
     user = User.query.get(user_id)
+
+    if user is None:
+        abort(404)
+
     if g.user not in event.users:
         abort(401)
 
-    items = Item.query.filter_by(event_id=event_id, user_id=user_id).all()
+    items = Item.query.filter_by(event_id=event_id, user_id=user_id).order_by(Item.id.desc()).all()
     progress = get_wishlist_progress(event_id, user_id)
     return render_template('wishlist.html', event=event, user=user, wishlist=items, progress=progress)
 
@@ -192,6 +194,11 @@ def children(event_id, user_id):
 @login_required
 def purchases(event_id, user_id):
     event = Event.query.get(event_id)
+    user = User.query.get(user_id)
+
+    if user is None:
+        abort(404)
+
     if g.user not in event.users:
         abort(401)
 
