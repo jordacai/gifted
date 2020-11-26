@@ -24,6 +24,7 @@ class Pair(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     gifter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     giftee_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    giftee = db.relationship('User', uselist=False, foreign_keys=[giftee_id])
 
     def __repr__(self):
         return '<Pair event_id=%r, gifter_id=%r, giftee_id=%r>' % (self.event_id, self.gifter_id, self.giftee_id)

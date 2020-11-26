@@ -114,9 +114,15 @@ $(document).ready(function(){
         <div class="card border-secondary">
             <div class="card-header text-left">
                 <span class="lead">{{ item.description }}</span>
+                {% if item.notes %}
+                <blockquote>
+                    <p class="text-left font-italic mt-1 mb-0">{{ item.notes }}</p>
+                    <footer class="blockquote-footer text-right">{{ user.first_name }}</footer>
+                </blockquote>
+                {% endif %}
             </div>
             <div class="card-body pt-2">
-                <div class="pb-3 text-left">
+                <div class="pb-3 text-right">
                     {% if item.priority == 'low' %}
                         <span data-toggle="lowPriority" data-placement="bottom" title="This is low priority.">
                             🔥
@@ -131,12 +137,6 @@ $(document).ready(function(){
                         </span>
                 {% endif %}
                 </div>
-                {% if item.notes %}
-                <blockquote>
-                    <p class="text-left font-italic">{{ item.notes }}</p>
-                    <footer class="blockquote-footer text-right">{{ user.first_name }}</footer>
-                </blockquote>
-                {% endif %}
                 {% if item.image %}
                 <a href="{{ item.location }}" target="_blank" rel="noopener noreferrer">
                     <img class="mb-3" src="{{ url_for('main.item_image', item_id=item.id) }}" alt="">
@@ -174,7 +174,7 @@ $(document).ready(function(){
                 {% else %}
                 <form action="{{ request.path }}/transactions" method="post">
                     <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}">
-                    <input type="hidden" id="gifter_id" name="gifter_id" value="{{ session['user_id'] }}">
+                    <input type="hidden" id="gifter_id" name="gifter_id" value="{{ g.user.id }}">
                     <input type="hidden" id="giftee_id" name="giftee_id" value="{{ user.id }}">
                     <button class="btn btn-primary btn-sm" type="submit">
                         <i class="fas fa-check-circle"></i><span class="ml-2">Claim</span>
@@ -187,14 +187,13 @@ $(document).ready(function(){
     </div>
 </div>
 <!-- modals -->
-<div class="modal fade" id="wishlistModal" tabindex="-1" role="dialog" aria-labelledby="wishlistModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="wishlistModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="wishlistModalLabel">Add an item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
                 </button>
             </div>
             <form action="{{ request.path }}" method="post">
@@ -205,8 +204,7 @@ $(document).ready(function(){
                                 <span class="input-group-text" id="pre-description">description</span>
                             </div>
                             <input id="description" name="description" type="text" class="form-control"
-                                   autocomplete="off" placeholder="what would you like?" aria-label="pre-description"
-                                   required>
+                                   autocomplete="off" placeholder="what would you like?" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -215,7 +213,7 @@ $(document).ready(function(){
                                 <span class="input-group-text" id="pre-url">url</span>
                             </div>
                             <input name="location" type="url" class="form-control" placeholder="where can we find it?"
-                                   autocomplete="off" aria-describedby="pre-url">
+                                   autocomplete="off">
                         </div>
                     </div>
                     <div class="form-group">
@@ -224,7 +222,7 @@ $(document).ready(function(){
                                 <span class="input-group-text" id="pre-price">price</span>
                             </div>
                             <input name="price" type="number" min="0.01" step="0.01" class="form-control"
-                                   placeholder="how much is it?" aria-describedby="pre-price" required>
+                                   placeholder="how much is it?" required>
                         </div>
                     </div>
                     <div class="form-group">

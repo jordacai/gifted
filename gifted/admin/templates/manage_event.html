@@ -179,7 +179,7 @@ $(document).ready(function(){
                         <label for="shuffledUsers">Select users to shuffle</label>
                     </div>
                     <div class="form-group">
-                        <select multiple class="form-control form-control-lg" id="shuffledUsers" name="shuffledUsers">
+                        <select multiple class="form-control form-control-lg" id="shuffledUsers" name="shuffledUsers" required>
                             {% for user in event.users %}
                                 <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
                             {% endfor %}
@@ -217,7 +217,7 @@ $(document).ready(function(){
                         <label for="users">Select users to add to this event</label>
                     </div>
                     <div class="form-group">
-                        <select multiple class="form-control form-control-lg" id="users" name="users">
+                        <select multiple class="form-control form-control-lg" id="users" name="users" required>
                             {% for user in available_users %}
                                 <option value="{{ user.id }}">
                                     {{ user.first_name }} {{ user.last_name }} {% if user.parent %}👶{% endif %}
@@ -254,11 +254,9 @@ $(document).ready(function(){
                         <li>Child accounts do not login</li>
                         <li>The chosen parent will manage the child's wishlist</li>
                     </ul>
-                    <div class="col-xs-4">
-                        <label for="parent">Select a parent</label>
-                    </div>
                     <div class="form-group">
-                        <select multiple class="form-control form-control-lg" id="parent" name="parent">
+                        <select class="form-control" id="parent" name="parent" required>
+                            <option disabled selected>Select a parent</option>
                             {% for user in event.users %}
                                 {% if user.parent is none %}
                                 <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
@@ -297,7 +295,7 @@ $(document).ready(function(){
                     <div class="form-group">
                         <div class="input-group col-sm">
                             <input class="form-control" id="email" autocomplete="off" autofocus name="email"
-                                   placeholder="email" type="email" required>
+                                   placeholder="email address" type="email" required>
                             <input hidden name="eventId" value="{{ event.id }}">
                         </div>
                     </div>
