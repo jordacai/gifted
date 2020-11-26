@@ -269,7 +269,8 @@ def forgot():
 
         message.html = render_template('forgot_password_email.html', email=email, code=code)
         mail.send(message)
-        flash('A password reset email was sent to {}!'.format(email), 'success')
+        flash(f'A password reset email was sent to {email}!', 'success')
+        app.logger.info(f'Sent password reset email to {email}')
         return redirect(url_for('main.login'))
     return render_template('forgot.html')
 
@@ -301,6 +302,7 @@ def reset():
         db.session.add(user)
         db.session.commit()
         flash(f'Successfully updated password for {username}!', 'success')
+        app.logger.info(f'{username} updated their password')
         return redirect(url_for('main.login'))
 
     return render_template('reset.html', email=request.args.get('email'), code=request.args.get('code'))

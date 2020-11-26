@@ -191,7 +191,7 @@ def invite():
                       sender=current_app.config.get("MAIL_USERNAME"),
                       recipients=[email])
     message.html = render_template('invitation_email.html', email=invitation.email, code=invitation.code, admin=g.user)
-    #mail.send(message)
+    mail.send(message)
 
     db.session.add(invitation)
     db.session.commit()
