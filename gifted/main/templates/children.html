@@ -27,6 +27,7 @@ children
 
     <div class="card-columns mb-4">
         {% for child in event.children %}
+        {% if child in g.user.children %}
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{ child.get_full_name() }} 👶</h5>
@@ -42,6 +43,7 @@ children
                 </a>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 </div>

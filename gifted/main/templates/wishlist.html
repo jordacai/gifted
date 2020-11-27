@@ -117,7 +117,13 @@ $(document).ready(function(){
                 {% if item.notes %}
                 <blockquote>
                     <p class="text-left font-italic mt-1 mb-0">{{ item.notes }}</p>
-                    <footer class="blockquote-footer text-right">{{ user.first_name }}</footer>
+                    <footer class="blockquote-footer text-right">
+                        {% if user.parent %}
+                            {{ user.parent.first_name }}
+                        {% else %}
+                            {{ user.first_name }}
+                        {% endif %}
+                    </footer>
                 </blockquote>
                 {% endif %}
             </div>
