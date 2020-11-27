@@ -46,11 +46,14 @@ def get_amazon_image_url(url):
               '&ASIN={}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=SL250'
     asin_dp = re.search(r'(?<=dp/)[A-Z0-9]{10}', url)
     asin_gp = re.search(r'(?<=gp/product/)[A-Z0-9]{10}', url)
+    asin_d = re.search(r'(?<=d/)[A-Z0-9]{10}', url)
 
     if asin_dp:
         return img_url.format(asin_dp.group(0))
     elif asin_gp:
         return img_url.format(asin_gp.group(0))
+    elif asin_d:
+        return img_url.format(asin_d.group(0))
     else:
         return None
 
