@@ -209,20 +209,6 @@ def purchases(event_id, user_id):
                            grouped_transactions=grouped_transactions)
 
 
-@main.route('/events/<event_id>/purchases/<user_id>/delete', methods=['POST'])
-@login_required
-def remove_purchase(event_id, user_id):
-    purchase_id = request.form.get('purchase_id')
-    purchase = Transaction.query.get(purchase_id)
-    item = purchase.item.description
-    giftee = purchase.giftee.first_name
-
-    db.session.delete(purchase)
-    db.session.commit()
-    flash(f'You unclaimed "{item}" for {giftee}!', 'warning')
-    return redirect(url_for('main.purchases', event_id=event_id, user_id=user_id))
-
-
 @main.route('/events/<event_id>/wishlists/<user_id>/items/<item_id>/delete', methods=['POST'])
 @login_required
 def remove_item(event_id, user_id, item_id):
@@ -248,6 +234,19 @@ def claim_item(event_id, user_id):
 
     flash(f'You claimed "{transaction.item.description}" for {transaction.giftee.first_name}!', 'success')
     return redirect(url_for('main.wishlist', event_id=event_id, user_id=user_id))
+
+
+@main.route('/events/<event_id>/wishlists/<user_id>/transactions/<transaction_id>/delete', methods=['POST'])
+@login_required
+def unclaim_item(event_id, user_id, transaction_id):
+    purchase = Transaction.query.get(transaction_id)
+    item = purchase.item.description
+    giftee = purchase.giftee.first_name
+
+    db.session.delete(purchase)
+    db.session.commit()
+    flash(f'You unclaimed "{item}" for {giftee}!', 'warning')
+    return redirect(url_for('main.purchases', event_id=event_id, user_id=user_id))
 
 
 @main.route('/forgot', methods=['GET', 'POST'])
