@@ -108,3 +108,4 @@ venv.bak/
 
 # Custom
 migrations/
+*.sqlite
