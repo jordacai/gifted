@@ -196,7 +196,7 @@ def invite():
     db.session.add(invitation)
     db.session.commit()
     flash(f'Invited {email} to {invitation.event.title}!', 'success')
-    app.logger.info(f'{g.user.username} invited {email} to {event_id}')
+    app.logger.info(f'{g.user.username} invited {email} to {invitation.event.title}')
     return redirect(url_for('admin.manage_event', event_id=event_id))
 
 

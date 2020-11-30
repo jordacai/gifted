@@ -77,7 +77,7 @@ event
 
     <div class="card-columns">
         {% for user in event.users %}
-        {% if user.id != g.user.id and user != giftee %}
+        {% if user.id != g.user.id and user.id != g.user.pair.giftee_id %}
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{ user.get_full_name() }} {% if user.parent is not none %}👶{% endif %}</h5>

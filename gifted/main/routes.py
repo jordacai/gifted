@@ -112,6 +112,7 @@ def register():
         db.session.commit()
 
         flash('Account created successfully!', 'success')
+        app.logger.info(f'{user.username} registered via invite to {event.description}')
         return redirect(url_for('main.login'))
 
     # it's a GET, render the template
@@ -129,7 +130,7 @@ def event(event_id):
 
     liability = Transaction.get_user_liability(event.id, g.user.id)
     progress = get_event_progress(event_id)
-    return render_template('event.html', event=event, progress=progress, liability=liability, giftee=g.user.pair)
+    return render_template('event.html', event=event, progress=progress, liability=liability)
 
 
 @main.route('/events/<event_id>/wishlists/<user_id>', methods=['GET', 'POST'])
