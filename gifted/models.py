@@ -168,6 +168,9 @@ class Event(db.Model):
         now = datetime.now()
         return True if now > self.ends_on else False
 
+    def get_recipient(self, gifter_id):
+        return Pair.query.filter_by(gifter_id=gifter_id, event_id=self.id).first()
+
     def matchmake(self, users):
         giftees = copy(users)
         random.shuffle(giftees)

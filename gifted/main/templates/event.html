@@ -49,18 +49,18 @@ event
         {% endif %}
     </div>
 
-    {% if g.user.pair %}
+    {% if pair and pair.gifter_id == g.user.id %}
     <div class="mb-4">
         <div class="card border-primary mx-auto">
             <div class="card-header"><strong>This is your person!</strong></div>
             <div class="card-body">
-                <h5 class="card-title text-primary">{{ g.user.pair.giftee.get_full_name() }}</h5>
-                {% if progress.get(g.user.pair.giftee.id).percent == '100.00' %}
+                <h5 class="card-title text-primary">{{ pair.giftee.get_full_name() }}</h5>
+                {% if progress.get(pair.giftee.id).percent == '100.00' %}
                     <p>wishlist is complete!</p>
-                {% elif progress.get(g.user.pair.giftee.id) is none %}
+                {% elif progress.get(pair.giftee.id) is none %}
                     <p>wishlist is not started</p>
                 {% else %}
-                    <p>wishlist total is ${{ progress.get(g.user.pair.giftee.id).total }}</p>
+                    <p>wishlist total is ${{ progress.get(pair.giftee.id).total }}</p>
                 {% endif %}
                 <div class="progress mb-3">
                     <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
