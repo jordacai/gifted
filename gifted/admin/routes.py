@@ -125,7 +125,7 @@ def add_user_child():
     first_name = request.form.get('firstName')
     last_name = request.form.get('lastName')
     event = Event.query.get(event_id)
-    child = User(username=str(uuid.uuid4()) + '@gifted.jcaimano.com',
+    child = User(username=str(uuid.uuid4()) + '@jordacai.com',
                  password=security.generate_password_hash(str(uuid.uuid4())),
                  parent_id=parent_id,
                  registrar_id=parent_id,

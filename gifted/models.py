@@ -67,6 +67,10 @@ class User(db.Model):
     last_name = db.Column(db.String(80), nullable=False)
     registered_on = db.Column(db.DateTime(), default=datetime.now())
     is_admin = db.Column(db.Integer, default=0)
+    events = db.relationship('Event',
+                             secondary=event_user,
+                             lazy=True,
+                             order_by='Event.starts_on.desc()')
     pair = db.relationship('Pair', backref='gifter', uselist=False, foreign_keys=[Pair.gifter_id],
                            cascade="all, delete-orphan")
     registrar = db.relationship('User', remote_side=id, foreign_keys=[registrar_id])
@@ -144,7 +148,6 @@ class Event(db.Model):
     ends_on = db.Column(db.DateTime())
     users = db.relationship('User',
                             secondary=event_user,
-                            backref=db.backref('events', lazy=True),
                             lazy=True)
     admins = db.relationship('User',
                              secondary=event_admin,
@@ -167,6 +170,9 @@ class Event(db.Model):
     def is_expired(self):
         now = datetime.now()
         return True if now > self.ends_on else False
+
+    def get_recipient(self, gifter_id):
+        return Pair.query.filter_by(gifter_id=gifter_id, event_id=self.id).first()
 
     def matchmake(self, users):
         giftees = copy(users)
